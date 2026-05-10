@@ -48,12 +48,22 @@ class Expense(db.Model):
     note = db.Column(db.Text)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
+    category = db.relationship(
+        'ExpenseCategory', 
+        backref=db.backref('expenses', lazy=True),
+        lazy='joined'          # hoặc 'select', 'subquery' tùy nhu cầu
+    )
+
     def to_dict(self):
         return {
             'id': self.id,
             'user_id': self.user_id,
             'category_id': self.category_id,
-            'category_name': self.category.name if self.category else None,
+            'category_name': self.category.label if self.category else None,
+            'category_icon': self.category.icon if self.category else None,
+            'category_color': self.category.color if self.category else None,
+            'category_bg_color': self.category.group.bg_color if self.category and self.category.group else None,
+            'type': 'Expense',
             'amount': float(self.amount),
             'date': self.date.isoformat(),
             'note': self.note,

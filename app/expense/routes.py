@@ -48,7 +48,7 @@ def get_expense_categories():
 @jwt_required()
 def get_expenses():
     user_id = int(get_jwt_identity())
-    expenses = Expense.query.filter_by(user_id=user_id).order_by(Expense.date.desc()).all()
+    expenses = Expense.query.filter_by(user_id=user_id).all()
     return jsonify([exp.to_dict() for exp in expenses]), 200
 
 @expense_bp.route('/', methods=['POST'])
@@ -77,7 +77,9 @@ def create_expense():
     )
     db.session.add(expense)
     db.session.commit()
-    return jsonify({'msg': 'Thêm chi tiêu thành công', 'id': expense.id}), 201
+    return jsonify({'msg': 'Successfully posting a new user expense', 
+                    'data': expense.to_dict()
+                    }), 201
 
 @expense_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required()
