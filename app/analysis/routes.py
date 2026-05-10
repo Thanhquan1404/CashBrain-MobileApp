@@ -68,7 +68,7 @@ def get_weekly_analysis():
             .filter(Expense.date == day_date.date())\
             .scalar() or 0
 
-        daily_total = float(daily_income - daily_expense)  # Có thể điều chỉnh logic theo nhu cầu
+        daily_total = float(daily_expense)  # Có thể điều chỉnh logic theo nhu cầu
 
         result.append({
             'day': day_name,

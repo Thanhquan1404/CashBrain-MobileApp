@@ -52,19 +52,17 @@ def delete_income_category(id):
 def get_incomes():
     user_id = get_jwt_identity()
     incomes = Income.query.filter_by(user_id=user_id).order_by(Income.date.desc()).all()
-    return jsonify([inc.to_dict() for inc in incomes]), 200
+    return jsonify(
+        {'msg': 'Successfully get user incomes', 'data': [inc.to_dict() for inc in incomes]}
+    ), 200
 
 @income_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_income():
     user_id = get_jwt_identity()
     data = request.get_json()
-    category_id = data.get('category_id')
     amount = data.get('amount')
     date_str = data.get('date')
-
-    if not category_id or not amount or not date_str:
-        return jsonify({'msg': 'Thiếu category_id, amount hoặc date'}), 400
 
     try:
         date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -73,14 +71,13 @@ def create_income():
 
     income = Income(
         user_id=user_id,
-        category_id=category_id,
         amount=amount,
         date=date,
         note=data.get('note', '')
     )
     db.session.add(income)
     db.session.commit()
-    return jsonify({'msg': 'Thêm thu nhập thành công', 'id': income.id}), 201
+    return jsonify({'msg': 'Thêm thu nhập thành công', 'data': income.to_dict()}), 201
 
 @income_bp.route('/<int:id>', methods=['PUT'])
 @jwt_required()
