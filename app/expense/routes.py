@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
-from app.expense.models import ExpenseCategory, Expense
+from app.expense.models import ExpenseCategory, Expense, ExpenseCategoryGroup
 from datetime import datetime
 
 expense_bp = Blueprint('expense', __name__, url_prefix='/api/expense')
@@ -10,45 +10,38 @@ expense_bp = Blueprint('expense', __name__, url_prefix='/api/expense')
 @expense_bp.route('/categories', methods=['GET'])
 @jwt_required()
 def get_expense_categories():
-    categories = ExpenseCategory.query.all()
-    return jsonify([{'id': c.id, 'name': c.name, 'description': c.description} for c in categories]), 200
 
-@expense_bp.route('/categories', methods=['POST'])
-@jwt_required()
-def create_expense_category():
-    data = request.get_json()
-    name = data.get('name')
-    if not name:
-        return jsonify({'msg': 'Thiếu tên danh mục'}), 400
-    cat = ExpenseCategory(name=name, description=data.get('description', ''))
-    db.session.add(cat)
-    db.session.commit()
-    return jsonify({'msg': 'Tạo danh mục thành công', 'id': cat.id}), 201
+    groups = ExpenseCategoryGroup.query.all()
 
-@expense_bp.route('/categories/<int:id>', methods=['PUT'])
-@jwt_required()
-def update_expense_category(id):
-    cat = ExpenseCategory.query.get_or_404(id)
-    data = request.get_json()
-    cat.name = data.get('name', cat.name)
-    cat.description = data.get('description', cat.description)
-    db.session.commit()
+    result = []
+
+    for group in groups:
+
+        categories = ExpenseCategory.query.filter_by(
+            group_id=group.id
+        ).all()
+
+        result.append({
+            'id': group.id,
+            'title': group.title,
+            'color': group.color,
+            'bgColor': group.bg_color,
+
+            'categories': [
+                {
+                    'id': category.id,
+                    'label': category.label,
+                    'icon': category.icon,
+                    'color': category.color
+                }
+                for category in categories
+            ]
+        })
+
     return jsonify({
-        'msg': 'Cập nhật danh mục thành công',
-        'data': {
-            'description': cat.description,
-            'id': cat.id,
-            'name': cat.name
-        }
+        'message': 'Successfully fetching expense categories',
+        'data': result
     }), 200
-
-@expense_bp.route('/categories/<int:id>', methods=['DELETE'])
-@jwt_required()
-def delete_expense_category(id):
-    cat = ExpenseCategory.query.get_or_404(id)
-    db.session.delete(cat)
-    db.session.commit()
-    return jsonify({'msg': 'Xóa danh mục thành công'}), 200
 
 # ────────────────────── EXPENSE CRUD ──────────────────────
 @expense_bp.route('/', methods=['GET'])
