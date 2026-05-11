@@ -238,3 +238,41 @@ def get_transactions():
         "total_expense": total_expense,
         "transactions": formatted_data
     })
+
+@analysis_bp.route('/overview-transactions', methods=['GET'])
+@jwt_required()
+def get_overview_transactions():
+    user_id = int(get_jwt_identity())
+    
+    incomes = Income.query.filter_by(user_id=user_id).all()
+    expenses = Expense.query.filter_by(user_id=user_id).all()
+    
+    results = []
+    
+    for inc in incomes:
+        year = inc.date.year
+        month = inc.date.month - 1      # JavaScript month là 0-based
+        day = inc.date.day
+        
+        results.append({
+            "date": [year, month, day],   # Dạng new Date(2026, 3, 14)
+            "amount": float(inc.amount)
+        })
+    
+    for exp in expenses:
+        year = exp.date.year
+        month = exp.date.month - 1
+        day = exp.date.day
+        
+        results.append({
+            "date": [year, month, day],
+            "amount": -float(exp.amount)
+        })
+    
+    # Sắp xếp theo ngày
+    results.sort(key=lambda x: x['date'])
+    
+    return jsonify({
+        'msg': 'Successfully get overview transactions',
+        'data': results
+    })
