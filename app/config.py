@@ -10,7 +10,8 @@ class Config:
 
     # Bind database for finance service
     SQLALCHEMY_BINDS = {
-        'finance_db': os.getenv('FINANCE_DATABASE_URL', 'mysql+pymysql://root:password@localhost/finance_db')
+        'finance_db': os.getenv('FINANCE_DATABASE_URL', 'mysql+pymysql://root:password@localhost/finance_db'),
+        'chatbot_db': os.getenv('CHATBOT_DATABASE_URL', 'mysql+pymysql://root:password@localhost/chatbot_db')
     }
 
     # JWT config

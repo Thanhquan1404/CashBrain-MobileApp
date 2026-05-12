@@ -18,6 +18,7 @@ def create_app(config_class='app.config.Config'):
         from app.models import user
         from app.income import models as income_models
         from app.expense import models as expense_models
+        from app.chatbot import models as chatbot_models
         db.create_all()
 
     # Đăng ký blueprint 
@@ -32,5 +33,8 @@ def create_app(config_class='app.config.Config'):
 
     from app.analysis.routes import analysis_bp
     app.register_blueprint(analysis_bp)
+
+    from app.chatbot.routes import chatbot_bp
+    app.register_blueprint(chatbot_bp)
 
     return app
