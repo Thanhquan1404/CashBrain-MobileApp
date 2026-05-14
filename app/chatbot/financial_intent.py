@@ -72,7 +72,6 @@ class FinancialIntentLayer:
         if not shopping_cat:
             return None
         
-        # Logic: > 20% tổng chi + xuất hiện < 8 ngày = bốc đồng
         if shopping_cat['pct_of_total'] > 20 and shopping_cat['active_days'] < 8:
             return (f"⚠️ Mua sắm: {shopping_cat['pct_of_total']}% tổng chi nhưng chỉ {shopping_cat['active_days']} ngày → "
                     f"chi tiêu tập trung không kiểm soát. Gợi ý: lập kế hoạch chi tiêu trước.")
@@ -93,7 +92,7 @@ class FinancialIntentLayer:
             return None
         
         if ent_cat['pct_of_total'] > 10 and ent_cat['active_days'] > 15:
-            return (f"ℹ️ Giải trí: {ent_cat['pct_of_total']}% tổng chi, {ent_cat['active_days']} ngày → "
+            return (f"ℹGiải trí: {ent_cat['pct_of_total']}% tổng chi, {ent_cat['active_days']} ngày → "
                     f"bạn có thói quen thường xuyên. Đây có thể là dấu hiệu stress.")
         return None
 
@@ -122,7 +121,7 @@ class FinancialIntentLayer:
         """Tỷ lệ tiết kiệm < 5% → nguy cáo"""
         saving = self.data['summary']['saving_rate']
         if saving < 5:
-            return (f"🔴 CẢNH BÁO: Tỷ lệ tiết kiệm chỉ {saving}% (gần như không tiết kiệm). "
+            return (f"CẢNH BÁO: Tỷ lệ tiết kiệm chỉ {saving}% (gần như không tiết kiệm). "
                     f"Bạn cần giảm chi tiêu ngay để tránh nợ nần.")
             return True
         return None
@@ -139,7 +138,7 @@ class FinancialIntentLayer:
         """Tỷ lệ tiết kiệm 15-30% → tốt"""
         saving = self.data['summary']['saving_rate']
         if 15 < saving <= 30:
-            return (f"🟢 Tỷ lệ tiết kiệm {saving}% là tốt. Tiếp tục duy trì!")
+            return (f"Tỷ lệ tiết kiệm {saving}% là tốt. Tiếp tục duy trì!")
         return None
 
     def _rule_excellent_saving_rate(self):
@@ -159,7 +158,7 @@ class FinancialIntentLayer:
         
         # Hệ số biến thiên > 30% = cao
         if avg > 0 and (std / avg) > 0.3:
-            return (f"📊 Chi tiêu không ổn định: độ lệch {std:.0f}đ "
+            return (f"Chi tiêu không ổn định: độ lệch {std:.0f}đ "
                     f"(tương đối {(std/avg*100):.0f}%). "
                     f"Gợi ý: lập ngân sách cụ thể cho từng tháng.")
         return None
@@ -185,7 +184,7 @@ class FinancialIntentLayer:
         
         if balance < 0:
             deficit = abs(balance)
-            return (f"🔴 CHỈ SỐ NGUY: Chi tiêu vượt thu nhập {deficit:.0f}đ "
+            return (f"CHỈ SỐ NGUY: Chi tiêu vượt thu nhập {deficit:.0f}đ "
                     f"({(-balance/income*100):.1f}%). Bạn đang sống vượt khả năng!")
         return None
 
