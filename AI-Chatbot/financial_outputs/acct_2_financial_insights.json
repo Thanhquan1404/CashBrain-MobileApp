@@ -1,0 +1,28 @@
+{
+  "account_id": "acct_2",
+  "generated_at": "2026-05-16T00:16:04",
+  "financial_summary": {
+    "total_income": 1400,
+    "total_expense": 442,
+    "balance": 958,
+    "saving_rate": 68.4,
+    "avg_monthly_expense": 40,
+    "std_monthly_expense": 13,
+    "daily_avg_expense": 15
+  },
+  "categories": {
+    "Public transport": {
+      "amount": 442,
+      "pct_of_total": 100,
+      "active_days": 184
+    }
+  },
+  "insights": [
+    "✓ Mức chi tiêu trung bình chỉ 15đ/ngày → rất tiết kiệm.",
+    "ℹ️ Giải trí: 100.0% tổng chi, 184 ngày → bạn có thói quen thường xuyên. Đây có thể là dấu hiệu stress.",
+    "🌟 Tỷ lệ tiết kiệm 68.4% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt.",
+    "📊 Chi tiêu không ổn định: độ lệch 13đ (tương đối 32%). Gợi ý: lập ngân sách cụ thể cho từng tháng.",
+    "📌 Public transport là khoản chi cao nhất: 100.0% tổng chi. Cân nhắc xem có thể tiết kiệm ở mục này không.",
+    "💡 Vận chuyển: 100.0% tổng chi → xem xét công ty cấp xe, đi bộ, hay dùng phương tiện công cộng."
+  ]
+}

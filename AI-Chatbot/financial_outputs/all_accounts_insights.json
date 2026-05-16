@@ -1,0 +1,234 @@
+{
+  "acct_1": {
+    "account_id": "acct_1",
+    "generated_at": "2026-05-16T00:16:04",
+    "financial_summary": {
+      "total_income": 24936,
+      "total_expense": 13064,
+      "balance": 11872,
+      "saving_rate": 47.6,
+      "avg_monthly_expense": 1188,
+      "std_monthly_expense": 902,
+      "daily_avg_expense": 435
+    },
+    "categories": {
+      "Bought for myself": {
+        "amount": 1273,
+        "pct_of_total": 9.7,
+        "active_days": 4
+      },
+      "Cafe": {
+        "amount": 1109,
+        "pct_of_total": 8.5,
+        "active_days": 85
+      },
+      "Clothes": {
+        "amount": 548,
+        "pct_of_total": 4.2,
+        "active_days": 3
+      },
+      "Fines": {
+        "amount": 24,
+        "pct_of_total": 0.2,
+        "active_days": 1
+      },
+      "Food": {
+        "amount": 1322,
+        "pct_of_total": 10.1,
+        "active_days": 72
+      },
+      "Gifts": {
+        "amount": 1177,
+        "pct_of_total": 9,
+        "active_days": 29
+      },
+      "Health": {
+        "amount": 772,
+        "pct_of_total": 5.9,
+        "active_days": 18
+      },
+      "Job": {
+        "amount": 64,
+        "pct_of_total": 0.5,
+        "active_days": 1
+      },
+      "Leisure": {
+        "amount": 738,
+        "pct_of_total": 5.6,
+        "active_days": 22
+      },
+      "Loan given": {
+        "amount": 2809,
+        "pct_of_total": 21.5,
+        "active_days": 10
+      },
+      "Other": {
+        "amount": 2465,
+        "pct_of_total": 18.9,
+        "active_days": 11
+      },
+      "Public transport": {
+        "amount": 70,
+        "pct_of_total": 0.5,
+        "active_days": 11
+      },
+      "Taxi": {
+        "amount": 618,
+        "pct_of_total": 4.7,
+        "active_days": 44
+      },
+      "University": {
+        "amount": 75,
+        "pct_of_total": 0.6,
+        "active_days": 7
+      }
+    },
+    "insights": [
+      "✓ Mức chi tiêu trung bình chỉ 435đ/ngày → rất tiết kiệm.",
+      "✓ Chi tiêu của bạn đa dạng trên 14 danh mục. Điều này giúp giảm rủi ro.",
+      "🌟 Tỷ lệ tiết kiệm 47.6% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt.",
+      "📊 Chi tiêu không ổn định: độ lệch 902đ (tương đối 76%). Gợi ý: lập ngân sách cụ thể cho từng tháng."
+    ]
+  },
+  "acct_2": {
+    "account_id": "acct_2",
+    "generated_at": "2026-05-16T00:16:04",
+    "financial_summary": {
+      "total_income": 1400,
+      "total_expense": 442,
+      "balance": 958,
+      "saving_rate": 68.4,
+      "avg_monthly_expense": 40,
+      "std_monthly_expense": 13,
+      "daily_avg_expense": 15
+    },
+    "categories": {
+      "Public transport": {
+        "amount": 442,
+        "pct_of_total": 100,
+        "active_days": 184
+      }
+    },
+    "insights": [
+      "✓ Mức chi tiêu trung bình chỉ 15đ/ngày → rất tiết kiệm.",
+      "ℹ️ Giải trí: 100.0% tổng chi, 184 ngày → bạn có thói quen thường xuyên. Đây có thể là dấu hiệu stress.",
+      "🌟 Tỷ lệ tiết kiệm 68.4% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt.",
+      "📊 Chi tiêu không ổn định: độ lệch 13đ (tương đối 32%). Gợi ý: lập ngân sách cụ thể cho từng tháng.",
+      "📌 Public transport là khoản chi cao nhất: 100.0% tổng chi. Cân nhắc xem có thể tiết kiệm ở mục này không.",
+      "💡 Vận chuyển: 100.0% tổng chi → xem xét công ty cấp xe, đi bộ, hay dùng phương tiện công cộng."
+    ]
+  },
+  "acct_3": {
+    "account_id": "acct_3",
+    "generated_at": "2026-05-16T00:16:04",
+    "financial_summary": {
+      "total_income": 64,
+      "total_expense": 1354,
+      "balance": -1290,
+      "saving_rate": -2016.0,
+      "avg_monthly_expense": 135,
+      "std_monthly_expense": 73,
+      "daily_avg_expense": 45
+    },
+    "categories": {
+      "Cafe": {
+        "amount": 315,
+        "pct_of_total": 23.3,
+        "active_days": 54
+      },
+      "Fines": {
+        "amount": 21,
+        "pct_of_total": 1.6,
+        "active_days": 1
+      },
+      "Food": {
+        "amount": 216,
+        "pct_of_total": 16,
+        "active_days": 45
+      },
+      "Gifts": {
+        "amount": 100,
+        "pct_of_total": 7.4,
+        "active_days": 8
+      },
+      "Health": {
+        "amount": 32,
+        "pct_of_total": 2.4,
+        "active_days": 2
+      },
+      "Job": {
+        "amount": 69,
+        "pct_of_total": 5.1,
+        "active_days": 3
+      },
+      "Leisure": {
+        "amount": 207,
+        "pct_of_total": 15.3,
+        "active_days": 7
+      },
+      "Other": {
+        "amount": 234,
+        "pct_of_total": 17.3,
+        "active_days": 7
+      },
+      "Public transport": {
+        "amount": 2,
+        "pct_of_total": 0.1,
+        "active_days": 2
+      },
+      "Taxi": {
+        "amount": 152,
+        "pct_of_total": 11.2,
+        "active_days": 13
+      },
+      "University": {
+        "amount": 6,
+        "pct_of_total": 0.4,
+        "active_days": 2
+      }
+    },
+    "insights": [
+      "🚨 CẢNH BÁO: Tỷ lệ tiết kiệm chỉ -2015.6% (gần như không tiết kiệm). Bạn cần giảm chi tiêu ngay để tránh nợ nần.",
+      "✓ Mức chi tiêu trung bình chỉ 45đ/ngày → rất tiết kiệm.",
+      "🔴 CHỈ SỐ NGUY: Chi tiêu vượt thu nhập 1,290đ (2015.6%). Bạn đang sống vượt khả năng!",
+      "✓ Chi tiêu của bạn đa dạng trên 11 danh mục. Điều này giúp giảm rủi ro.",
+      "📊 Chi tiêu không ổn định: độ lệch 73đ (tương đối 54%). Gợi ý: lập ngân sách cụ thể cho từng tháng."
+    ]
+  },
+  "acct_4": {
+    "account_id": "acct_4",
+    "generated_at": "2026-05-16T00:16:04",
+    "financial_summary": {
+      "total_income": 58,
+      "total_expense": 0,
+      "balance": 58,
+      "saving_rate": 100,
+      "avg_monthly_expense": 0,
+      "std_monthly_expense": 0,
+      "daily_avg_expense": 0
+    },
+    "categories": {},
+    "insights": [
+      "✓ Mức chi tiêu trung bình chỉ 0đ/ngày → rất tiết kiệm.",
+      "🌟 Tỷ lệ tiết kiệm 100.0% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt."
+    ]
+  },
+  "acct_5": {
+    "account_id": "acct_5",
+    "generated_at": "2026-05-16T00:16:04",
+    "financial_summary": {
+      "total_income": 171,
+      "total_expense": 0,
+      "balance": 171,
+      "saving_rate": 100,
+      "avg_monthly_expense": 0,
+      "std_monthly_expense": 0,
+      "daily_avg_expense": 0
+    },
+    "categories": {},
+    "insights": [
+      "✓ Mức chi tiêu trung bình chỉ 0đ/ngày → rất tiết kiệm.",
+      "🌟 Tỷ lệ tiết kiệm 100.0% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt."
+    ]
+  }
+}

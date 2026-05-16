@@ -1,10 +1,9 @@
-# chatbot/routes.py
 """
-Chatbot Routes - API endpoints cho AI Chatbot
+Chatbot Routes - API endpoints cho AI Chatbot có tích hợp Gemini API
 
 Endpoints:
-1. POST /api/chat/message           - Gửi tin nhắn (lưu memory)
-2. POST /api/chat/prompt-preview    - Preview prompt (không lưu memory)
+1. POST /api/chat/message           - Gửi tin nhắn (gọi Gemini + lưu memory)
+2. POST /api/chat/prompt-preview    - Preview prompt & test Gemini (không lưu memory)
 3. GET  /api/chat/history           - Xem lịch sử hội thoại
 4. DELETE /api/chat/history         - Xóa lịch sử
 5. GET  /api/chat/financial-debug   - Debug: xem raw financial data
@@ -12,9 +11,13 @@ Endpoints:
 7. GET  /api/chat/insights          - Debug: chỉ xem insights
 """
 
+import os
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
+from google import genai
+from google.genai import types
+
 from app import db
 from app.models.user import User
 from .financial_analysis import FinancialAnalysisLayer
@@ -24,6 +27,14 @@ from .conversation_memory import ConversationMemory
 
 chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/api/chat')
 
+# Khởi tạo Gemini Client (Lấy API Key từ Environment Variable)
+# Đảm bảo bạn đã chạy: export GEMINI_API_KEY="your_api_key_here"
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+client = genai.Client(api_key="AIzaSyB4yPJzCODyVUOld2zNWdIMSEvguURzZvE")
+
+# Sử dụng mô hình gemini-2.5-flash tối ưu cho tốc độ và chat chat tổng hợp
+GEMINI_MODEL = "gemini-2.5-flash"
+
 # ============================================================================
 # 1. MAIN ENDPOINT: /api/chat/message (POST)
 # ============================================================================
@@ -32,25 +43,18 @@ chatbot_bp = Blueprint('chatbot', __name__, url_prefix='/api/chat')
 @jwt_required()
 def chat_message():
     """
-    Main chat endpoint - Gửi tin nhắn, nhận final prompt, lưu memory
+    Main chat endpoint - Gửi tin nhắn, nhận final prompt, gọi Gemini, lưu memory
     
     Request:
     {
         "message": "Tôi chi tiêu bao nhiêu cho ăn uống?",
         "months": 3  (optional, default=3)
     }
-    
-    Response:
-    {
-        "status": "success",
-        "message_id": "uuid",
-        "final_prompt": "...",
-        "financial_summary": {...},
-        "insights": [...],
-        "history_count": 5
-    }
     """
     try:
+        if not GEMINI_API_KEY:
+            return jsonify({'error': 'Gemini API Key is missing on server configuration'}), 500
+
         user_id = int(get_jwt_identity())
         data = request.get_json() or {}
         user_message = data.get('message', '').strip()
@@ -85,23 +89,40 @@ def chat_message():
         )
         final_prompt = engine.build_prompt(user_message)
         
-        # 6) Lưu user message vào memory (chưa có response từ Gemini)
-        # Snapshot financial data để theo dõi thay đổi theo thời gian
+        # 6) Lưu user message vào memory (trước khi gọi API đề phòng timeout)
         memory.add_message(
             role='user',
             content=user_message,
             snapshot=financial_data['summary']
         )
         
-        # 7) Trả về response
+        # 7) Gọi Gemini API để lấy câu trả lời
+        # Sử dụng GenerateContentConfig để tối ưu hóa tính sáng tạo (temperature thấp giúp câu trả lời tài chính chính xác hơn)
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=final_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.3,
+            )
+        )
+        ai_response = response.text
+        
+        # 8) Lưu AI response vào memory
+        memory.add_message(
+            role='model',
+            content=ai_response,
+            snapshot=financial_data['summary']
+        )
+        
+        # 9) Trả về response hoàn chỉnh cho Frontend
         return jsonify({
             'status': 'success',
-            'message': user_message,
-            'final_prompt': final_prompt,
+            'user_message': user_message,
+            'ai_response': ai_response,
             'financial_summary': financial_data['summary'],
             'insights': insights,
             'insights_count': len(insights),
-            'history_count': len(history) + 1,  # +1 vì vừa thêm user message
+            'history_count': len(history) + 2,  # +2 vì vừa thêm cả cặp user và model
             'timestamp': datetime.today().isoformat()
         }), 200
         
@@ -117,7 +138,7 @@ def chat_message():
 @jwt_required()
 def prompt_preview():
     """
-    Preview endpoint - Xem final prompt MỘT LẦN không lưu memory
+    Preview endpoint - Xem final prompt MỘT LẦN + Test Gemini phản hồi nhanh
     
     Dùng khi developer muốn test/fine-tune prompt mà không muốn pollute history
     """
@@ -151,10 +172,21 @@ def prompt_preview():
         )
         final_prompt = engine.build_prompt(user_message)
         
+        # Thử nghiệm gọi Gemini ngay tại endpoint preview để dev xem kết quả thô
+        ai_preview_response = "Gemini Key Not Configured"
+        if GEMINI_API_KEY:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=final_prompt,
+                config=types.GenerateContentConfig(temperature=0.3)
+            )
+            ai_preview_response = response.text
+        
         return jsonify({
             'status': 'preview_only',
             'message': user_message,
             'final_prompt': final_prompt,
+            'ai_preview_response': ai_preview_response,
             'prompt_length': len(final_prompt),
             'financial_summary': financial_data['summary'],
             'insights': insights,
@@ -221,11 +253,6 @@ def delete_history():
 def financial_debug_get():
     """
     DEBUG: Xem raw financial analysis data (không có insights)
-    
-    Giúp developer kiểm tra:
-    - Tính toán tổng/trung bình có đúng không
-    - Category breakdown
-    - Time series data
     """
     try:
         user_id = int(get_jwt_identity())
@@ -249,10 +276,6 @@ def financial_debug_get():
 def financial_debug_with_insights():
     """
     DEBUG: Xem financial data + insights (không có prompt assembly)
-    
-    Giúp developer:
-    - Kiểm tra insights được trigger đúng không
-    - Verify rule logic
     """
     try:
         user_id = int(get_jwt_identity())
@@ -283,8 +306,6 @@ def financial_debug_with_insights():
 def get_insights():
     """
     DEBUG: Chỉ xem insights (không có financial data)
-    
-    Dùng khi bạn muốn tập trung vào logic các rules
     """
     try:
         user_id = int(get_jwt_identity())
@@ -316,14 +337,6 @@ def get_insights():
 def prompt_blocks_debug():
     """
     ADVANCED DEBUG: Xem từng block của prompt riêng biệt
-    
-    Dùng khi fine-tune prompt để tắt/bật từng block:
-    - Block 0: System role
-    - Block 1: User context
-    - Block 2: Financial data
-    - Block 3: Insights
-    - Block 4: Conversation history
-    - Block 5: Task instruction
     """
     try:
         user_id = int(get_jwt_identity())
@@ -354,7 +367,6 @@ def prompt_blocks_debug():
             history_messages=history
         )
         
-        # build_prompt_preview trả về dict các block riêng biệt
         blocks = engine.build_prompt_preview()
         
         return jsonify({
@@ -382,5 +394,6 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'chatbot',
+        'gemini_configured': GEMINI_API_KEY is not None,
         'timestamp': datetime.today().isoformat()
     }), 200

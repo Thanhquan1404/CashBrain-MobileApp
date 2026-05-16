@@ -1,0 +1,91 @@
+{
+  "account_id": "acct_1",
+  "generated_at": "2026-05-16T00:16:04",
+  "financial_summary": {
+    "total_income": 24936,
+    "total_expense": 13064,
+    "balance": 11872,
+    "saving_rate": 47.6,
+    "avg_monthly_expense": 1188,
+    "std_monthly_expense": 902,
+    "daily_avg_expense": 435
+  },
+  "categories": {
+    "Bought for myself": {
+      "amount": 1273,
+      "pct_of_total": 9.7,
+      "active_days": 4
+    },
+    "Cafe": {
+      "amount": 1109,
+      "pct_of_total": 8.5,
+      "active_days": 85
+    },
+    "Clothes": {
+      "amount": 548,
+      "pct_of_total": 4.2,
+      "active_days": 3
+    },
+    "Fines": {
+      "amount": 24,
+      "pct_of_total": 0.2,
+      "active_days": 1
+    },
+    "Food": {
+      "amount": 1322,
+      "pct_of_total": 10.1,
+      "active_days": 72
+    },
+    "Gifts": {
+      "amount": 1177,
+      "pct_of_total": 9,
+      "active_days": 29
+    },
+    "Health": {
+      "amount": 772,
+      "pct_of_total": 5.9,
+      "active_days": 18
+    },
+    "Job": {
+      "amount": 64,
+      "pct_of_total": 0.5,
+      "active_days": 1
+    },
+    "Leisure": {
+      "amount": 738,
+      "pct_of_total": 5.6,
+      "active_days": 22
+    },
+    "Loan given": {
+      "amount": 2809,
+      "pct_of_total": 21.5,
+      "active_days": 10
+    },
+    "Other": {
+      "amount": 2465,
+      "pct_of_total": 18.9,
+      "active_days": 11
+    },
+    "Public transport": {
+      "amount": 70,
+      "pct_of_total": 0.5,
+      "active_days": 11
+    },
+    "Taxi": {
+      "amount": 618,
+      "pct_of_total": 4.7,
+      "active_days": 44
+    },
+    "University": {
+      "amount": 75,
+      "pct_of_total": 0.6,
+      "active_days": 7
+    }
+  },
+  "insights": [
+    "✓ Mức chi tiêu trung bình chỉ 435đ/ngày → rất tiết kiệm.",
+    "✓ Chi tiêu của bạn đa dạng trên 14 danh mục. Điều này giúp giảm rủi ro.",
+    "🌟 Tỷ lệ tiết kiệm 47.6% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt.",
+    "📊 Chi tiêu không ổn định: độ lệch 902đ (tương đối 76%). Gợi ý: lập ngân sách cụ thể cho từng tháng."
+  ]
+}

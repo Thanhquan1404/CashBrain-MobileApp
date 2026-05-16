@@ -1,0 +1,18 @@
+{
+  "account_id": "acct_5",
+  "generated_at": "2026-05-16T00:16:04",
+  "financial_summary": {
+    "total_income": 171,
+    "total_expense": 0,
+    "balance": 171,
+    "saving_rate": 100,
+    "avg_monthly_expense": 0,
+    "std_monthly_expense": 0,
+    "daily_avg_expense": 0
+  },
+  "categories": {},
+  "insights": [
+    "✓ Mức chi tiêu trung bình chỉ 0đ/ngày → rất tiết kiệm.",
+    "🌟 Tỷ lệ tiết kiệm 100.0% là xuất sắc! Bạn kiểm soát chi tiêu rất tốt."
+  ]
+}

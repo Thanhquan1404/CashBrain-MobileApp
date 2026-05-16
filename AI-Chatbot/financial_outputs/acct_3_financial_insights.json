@@ -1,0 +1,77 @@
+{
+  "account_id": "acct_3",
+  "generated_at": "2026-05-16T00:16:04",
+  "financial_summary": {
+    "total_income": 64,
+    "total_expense": 1354,
+    "balance": -1290,
+    "saving_rate": -2016.0,
+    "avg_monthly_expense": 135,
+    "std_monthly_expense": 73,
+    "daily_avg_expense": 45
+  },
+  "categories": {
+    "Cafe": {
+      "amount": 315,
+      "pct_of_total": 23.3,
+      "active_days": 54
+    },
+    "Fines": {
+      "amount": 21,
+      "pct_of_total": 1.6,
+      "active_days": 1
+    },
+    "Food": {
+      "amount": 216,
+      "pct_of_total": 16,
+      "active_days": 45
+    },
+    "Gifts": {
+      "amount": 100,
+      "pct_of_total": 7.4,
+      "active_days": 8
+    },
+    "Health": {
+      "amount": 32,
+      "pct_of_total": 2.4,
+      "active_days": 2
+    },
+    "Job": {
+      "amount": 69,
+      "pct_of_total": 5.1,
+      "active_days": 3
+    },
+    "Leisure": {
+      "amount": 207,
+      "pct_of_total": 15.3,
+      "active_days": 7
+    },
+    "Other": {
+      "amount": 234,
+      "pct_of_total": 17.3,
+      "active_days": 7
+    },
+    "Public transport": {
+      "amount": 2,
+      "pct_of_total": 0.1,
+      "active_days": 2
+    },
+    "Taxi": {
+      "amount": 152,
+      "pct_of_total": 11.2,
+      "active_days": 13
+    },
+    "University": {
+      "amount": 6,
+      "pct_of_total": 0.4,
+      "active_days": 2
+    }
+  },
+  "insights": [
+    "🚨 CẢNH BÁO: Tỷ lệ tiết kiệm chỉ -2015.6% (gần như không tiết kiệm). Bạn cần giảm chi tiêu ngay để tránh nợ nần.",
+    "✓ Mức chi tiêu trung bình chỉ 45đ/ngày → rất tiết kiệm.",
+    "🔴 CHỈ SỐ NGUY: Chi tiêu vượt thu nhập 1,290đ (2015.6%). Bạn đang sống vượt khả năng!",
+    "✓ Chi tiêu của bạn đa dạng trên 11 danh mục. Điều này giúp giảm rủi ro.",
+    "📊 Chi tiêu không ổn định: độ lệch 73đ (tương đối 54%). Gợi ý: lập ngân sách cụ thể cho từng tháng."
+  ]
+}
