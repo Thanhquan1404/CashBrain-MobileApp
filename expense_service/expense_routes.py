@@ -41,7 +41,11 @@ def get_expense_categories():
 def get_expenses():
     user_id = str(get_jwt_identity())
     expenses = Expense.objects(user_id=user_id).order_by('-date')
-    return jsonify([exp.to_dict() for exp in expenses]), 200
+    return jsonify({
+        'message': 'Successfully retrieve user\'s expense data',
+        'data': [exp.to_dict() for exp in expenses]
+        
+    }), 200
 
 @expense_bp.route('/', methods=['POST'])
 @jwt_required()
