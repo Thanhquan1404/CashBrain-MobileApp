@@ -4,14 +4,20 @@ from flask_jwt_extended import JWTManager
 from mongoengine import connect
 import os
 from dotenv import load_dotenv
+from datetime import timedelta
 
 load_dotenv()
 
 app = Flask(__name__)
 
-# Cấu hình JWT
-app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key')
-jwt = JWTManager(app)
+# ====================== JWT CONFIGURATION ======================
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-super-secret-key')
+
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=600)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+
+jwt = JWTManager(app)    # Recommended: 7 - 30 days
+#==================================================================
 
 # Kết nối MongoDB Serverless
 MONGO_URI = os.getenv('MONGO_URI')
