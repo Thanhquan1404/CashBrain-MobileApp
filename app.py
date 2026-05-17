@@ -24,9 +24,11 @@ connect(host=MONGO_URI, alias='default')   # kết nối mặc định
 from expense_service.expense_routes import expense_bp
 from auth_service.auth_routes import auth_bp
 from income_service.income_routes import income_bp
+from analysis_service.analysis_routes import analysis_bp
 app.register_blueprint(expense_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(income_bp)
+app.register_blueprint(analysis_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
