@@ -7,6 +7,7 @@ certifi==2026.4.22
 cffi==2.0.0
 charset-normalizer==3.4.7
 click==8.3.3
+cloudinary==1.44.2
 comm==0.2.3
 cryptography==48.0.0
 debugpy==1.8.20
