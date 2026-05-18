@@ -27,10 +27,14 @@ app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
 # CORS - Rất quan trọng khi frontend gọi từ domain khác
-CORS(app, resources={r"/*": {"origins": "*"}}, 
+CORS(app,
+     origins="*",                    
+     # origins=["http://localhost:8081", "https://your-frontend-domain.com"], 
      supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
      methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-     allow_headers=["Content-Type", "Authorization"])
+     expose_headers=["Content-Type", "Authorization"],
+     max_age=3600)   # cache preflight 1 giờ
 
 jwt = JWTManager(app)
 # ============================================================
@@ -54,9 +58,11 @@ app.register_blueprint(income_bp)
 app.register_blueprint(analysis_bp)
 
 @app.after_request
-def add_cors_headers(response):
-    if response.headers.get('Access-Control-Allow-Origin') is None:
-        response.headers['Access-Control-Allow-Origin'] = '*'
+def after_request(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Accept"
     return response
 
 # ====================== CHẠY TRÊN RENDER ======================
