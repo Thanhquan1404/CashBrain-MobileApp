@@ -5,6 +5,9 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from datetime import timedelta
+import cloudinary
+import cloudinary.uploader
+
 
 load_dotenv()
 
@@ -49,6 +52,17 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(income_bp)
 app.register_blueprint(analysis_bp)
 
+# ====================== CLOUDINARY SET UP ======================
+CLOUDINARY_NAME=os.getenv('CLOUDINARY_NAME', 'your-cloudinary-name')
+CLOUDINARY_API_KEY=os.getenv('CLOUDINARY_API_KEY', 'your-cloudinary-api-key')
+CLOUDINARY_API_SECRET=os.getenv('CLOUDINARY_API_SECRET', 'your-cloudinary-api-key')
+cloudinary.config(
+    cloud_name = CLOUDINARY_NAME,
+    api_key = CLOUDINARY_API_KEY,
+    api_secret = CLOUDINARY_API_SECRET,
+    secure = True
+)
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=True)
