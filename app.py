@@ -27,9 +27,10 @@ app.config['JWT_HEADER_NAME'] = 'Authorization'
 app.config['JWT_HEADER_TYPE'] = 'Bearer'
 
 # CORS - Rất quan trọng khi frontend gọi từ domain khác
-CORS(app, 
-     resources={r"/api/*": {"origins": "*"}},   # Tạm thời cho phép tất cả, sau có thể lock lại
-     supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, 
+     supports_credentials=True,
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+     allow_headers=["Content-Type", "Authorization"])
 
 jwt = JWTManager(app)
 # ============================================================
@@ -51,6 +52,12 @@ app.register_blueprint(expense_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(income_bp)
 app.register_blueprint(analysis_bp)
+
+@app.after_request
+def add_cors_headers(response):
+    if response.headers.get('Access-Control-Allow-Origin') is None:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 # ====================== CHẠY TRÊN RENDER ======================
 if __name__ == '__main__':
