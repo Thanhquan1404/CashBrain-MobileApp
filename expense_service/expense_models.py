@@ -2,6 +2,14 @@
 from mongoengine import Document, EmbeddedDocument, fields
 from datetime import datetime
 
+# expense_models.py (bổ sung)
+class ExpenseImage(Document):
+    meta = {'collection': 'expense_images'}
+    expense_id = fields.ObjectIdField(required=True, unique=True)  # 1-1 với expense
+    image_url = fields.StringField(required=True)   # URL trên Cloudinary
+    public_id = fields.StringField(required=True)   # dùng để xoá khỏi Cloudinary
+    created_at = fields.DateTimeField(default=datetime.utcnow)
+
 class ExpenseCategoryGroup(Document):
     meta = {'collection': 'expense_category_groups'}
     title = fields.StringField(required=True, max_length=100)
