@@ -65,6 +65,34 @@ cloudinary.config(
     secure = True
 )
 
+from flask import send_from_directory
+
+@app.route('/openapi.yaml')
+def serve_openapi():
+    return send_from_directory('.', 'openapi.yaml')   # or 'static' if you put it there
+
+@app.route('/docs')
+def swagger_ui():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>API Docs</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+    </head>
+    <body>
+        <div id="swagger-ui"></div>
+        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <script>
+            SwaggerUIBundle({
+                url: "/openapi.yaml",
+                dom_id: '#swagger-ui'
+            });
+        </script>
+    </body>
+    </html>
+    """
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
