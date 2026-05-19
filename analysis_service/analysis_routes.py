@@ -4,7 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from bson import ObjectId
 from datetime import datetime, timedelta
 import calendar
-from expense_service.expense_models import Expense, ExpenseCategory
+# BƯỚC 1: Hãy chắc chắn đã import ExpenseImage ở đây
+from expense_service.expense_models import Expense, ExpenseCategory, ExpenseImage 
 from income_service.income_models import Income
 from decimal import Decimal
 
@@ -13,45 +14,100 @@ analysis_bp = Blueprint('analysis', __name__, url_prefix='/api/analysis')
 @analysis_bp.route('/monthly', methods=['GET'])
 @jwt_required()
 def get_monthly_analysis():
-    user_id = get_jwt_identity()  # string
+    user_id = get_jwt_identity()
     today = datetime.today()
     year = today.year
     month = today.month
 
-    # Dùng aggregation để tính tổng thu nhập trong tháng
-    income_pipeline = [
-        {'$match': {
-            'user_id': user_id,
-            'date': {
-                '$gte': datetime(year, month, 1),
-                '$lt': datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
-            }
-        }},
-        {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
-    ]
-    income_result = list(Income.objects.aggregate(*income_pipeline))
-    total_income = income_result[0]['total'] if income_result else 0.0
+    # ====================== THÁNG HIỆN TẠI ======================
+    def get_month_range(y, m):
+        start = datetime(y, m, 1)
+        if m == 12:
+            end = datetime(y + 1, 1, 1)
+        else:
+            end = datetime(y, m + 1, 1)
+        return start, end
 
-    expense_pipeline = [
-        {'$match': {
-            'user_id': user_id,
-            'date': {
-                '$gte': datetime(year, month, 1),
-                '$lt': datetime(year, month + 1, 1) if month < 12 else datetime(year + 1, 1, 1)
-            }
-        }},
+    current_start, current_end = get_month_range(year, month)
+
+    # Tổng thu - chi
+    income_pipeline = [
+        {'$match': {'user_id': user_id, 'date': {'$gte': current_start, '$lt': current_end}}},
         {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
     ]
-    expense_result = list(Expense.objects.aggregate(*expense_pipeline))
-    total_expense = expense_result[0]['total'] if expense_result else 0.0
+    expense_pipeline = [
+        {'$match': {'user_id': user_id, 'date': {'$gte': current_start, '$lt': current_end}}},
+        {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
+    ]
+
+    total_income = list(Income.objects.aggregate(*income_pipeline))[0]['total'] if list(Income.objects.aggregate(*income_pipeline)) else 0.0
+    total_expense = list(Expense.objects.aggregate(*expense_pipeline))[0]['total'] if list(Expense.objects.aggregate(*expense_pipeline)) else 0.0
+
+    # Số lượng transaction
+    num_income = Income.objects(user_id=user_id, date__gte=current_start, date__lt=current_end).count()
+    num_expense = Expense.objects(user_id=user_id, date__gte=current_start, date__lt=current_end).count()
+    number_of_transactions = num_income + num_expense
+
+    # Số expense có ảnh
+    expense_ids_current = Expense.objects(
+        user_id=user_id, 
+        date__gte=current_start, 
+        date__lt=current_end
+    ).scalar('id')
+    
+    number_of_expense_image = ExpenseImage.objects(
+        expense_id__in=expense_ids_current
+    ).count()
+
+    # ====================== THÁNG TRƯỚC ======================
+    if month == 1:
+        last_year, last_month = year - 1, 12
+    else:
+        last_year, last_month = year, month - 1
+
+    last_start, last_end = get_month_range(last_year, last_month)
+
+    # Transaction tháng trước
+    last_num_income = Income.objects(user_id=user_id, date__gte=last_start, date__lt=last_end).count()
+    last_num_expense = Expense.objects(user_id=user_id, date__gte=last_start, date__lt=last_end).count()
+    last_total_transactions = last_num_income + last_num_expense
+
+    # Expense image tháng trước
+    expense_ids_last = Expense.objects(
+        user_id=user_id, 
+        date__gte=last_start, 
+        date__lt=last_end
+    ).scalar('id')
+    
+    last_number_of_expense_image = ExpenseImage.objects(
+        expense_id__in=expense_ids_last
+    ).count()
+
+    # Tính percentage transaction
+    if last_total_transactions > 0:
+        percentage_transaction = round(
+            ((number_of_transactions - last_total_transactions) / last_total_transactions) * 100, 
+            2
+        )
+    else:
+        percentage_transaction = 0.0 if number_of_transactions == 0 else 100.0
+
+    # Chênh lệch số ảnh (có thể âm)
+    number_image_against_last_month = number_of_expense_image - last_number_of_expense_image
 
     return jsonify({
         'message': 'Retrieve the monthly analysis data',
         'data': {
-            'total_income': total_income,
-            'total_expense': total_expense,
-            'balance': total_income - total_expense,
-            'month': today.strftime('%Y-%m')
+            'total_income': float(total_income),
+            'total_expense': float(total_expense),
+            'balance': float(total_income - total_expense),
+            'month': today.strftime('%Y-%m'),
+            
+            # Dữ liệu mới
+            'number_of_transactions': number_of_transactions,
+            'percentage_transaction_against_last_month': percentage_transaction,
+            'number_of_expense_image': number_of_expense_image,
+            'number_image_against_last_month': number_image_against_last_month
         }
     })
 
