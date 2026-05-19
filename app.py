@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_jwt_extended import JWTManager
 from mongoengine import connect
 from flask_cors import CORS
@@ -92,6 +92,11 @@ def swagger_ui():
     </body>
     </html>
     """
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        "message": "Welcome to our CashBrain mobile app"
+    }), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
