@@ -46,7 +46,7 @@ def get_monthly_analysis():
     total_expense = expense_result[0]['total'] if expense_result else 0.0
 
     return jsonify({
-        'msg': 'Retrieve the monthly analysis data',
+        'message': 'Retrieve the monthly analysis data',
         'data': {
             'total_income': total_income,
             'total_expense': total_expense,
@@ -89,76 +89,9 @@ def get_weekly_analysis():
         })
 
     return jsonify({
-        'msg': 'Retrieve the weekly analysis data',
+        'message': 'Retrieve the weekly analysis data',
         'data': result,
         'week': f"{start_of_week.strftime('%d/%m')} - {end_of_week.strftime('%d/%m/%Y')}"
-    })
-
-@analysis_bp.route('/calendar', methods=['GET'])
-@jwt_required()
-def get_calendar_analysis():
-    user_id = get_jwt_identity()
-    try:
-        year = int(request.args.get('year', datetime.today().year))
-        month = int(request.args.get('month', datetime.today().month))
-    except ValueError:
-        return jsonify({'msg': 'Invalid month or year format'}), 400
-
-    _, days_in_month = calendar.monthrange(year, month)
-    start_date = datetime(year, month, 1)
-    if month == 12:
-        end_date = datetime(year + 1, 1, 1)
-    else:
-        end_date = datetime(year, month + 1, 1)
-
-    # Aggregation cho incomes
-    income_pipeline = [
-        {'$match': {
-            'user_id': user_id,
-            'date': {'$gte': start_date, '$lt': end_date}
-        }},
-        {'$group': {
-            '_id': {'$dayOfMonth': '$date'},
-            'total': {'$sum': '$amount'}
-        }}
-    ]
-    income_agg = {doc['_id']: doc['total'] for doc in Income.objects.aggregate(*income_pipeline)}
-
-    expense_pipeline = [
-        {'$match': {
-            'user_id': user_id,
-            'date': {'$gte': start_date, '$lt': end_date}
-        }},
-        {'$group': {
-            '_id': {'$dayOfMonth': '$date'},
-            'total': {'$sum': '$amount'}
-        }}
-    ]
-    expense_agg = {doc['_id']: doc['total'] for doc in Expense.objects.aggregate(*expense_pipeline)}
-
-    calendar_days = []
-    for day in range(1, days_in_month + 1):
-        day_income = income_agg.get(day, 0.0)
-        day_expense = expense_agg.get(day, 0.0)
-        balance = day_income - day_expense
-        day_data = {'day': day}
-        if balance != 0:
-            prefix = '+' if balance > 0 else '-'
-            abs_balance = abs(balance)
-            if abs_balance >= 1000:
-                badge_value = f"{prefix}{int(abs_balance/1000)}K"
-            else:
-                badge_value = f"{prefix}{int(abs_balance)}"
-            day_data['badge'] = badge_value
-            day_data['balance'] = balance
-        calendar_days.append(day_data)
-
-    return jsonify({
-        'msg': f'Retrieve analysis for {year}-{month:02d}',
-        'data': {
-            'month': f"{year}-{month:02d}",
-            'calendar_days': calendar_days
-        }
     })
 
 @analysis_bp.route('/calendar-month', methods=['GET'])
@@ -256,19 +189,19 @@ def get_overview_transactions():
 
     results = []
     for inc in incomes:
-        # JavaScript month: 0-based
         results.append({
-            "date": [inc.date.year, inc.date.month - 1, inc.date.day],
-            "amount": inc.amount
+            "date": [inc.date.year, inc.date.month, inc.date.day],
+            "amount": str(float(inc.amount))
         })
     for exp in expenses:
+        print(exp.id)
         results.append({
-            "date": [exp.date.year, exp.date.month - 1, exp.date.day],
-            "amount": -exp.amount
+            "date": [exp.date.year, exp.date.month, exp.date.day],
+            "amount": str(-float(exp.amount))
         })
 
     results.sort(key=lambda x: (x['date'][0], x['date'][1], x['date'][2]))
     return jsonify({
-        'msg': 'Successfully get overview transactions',
+        'message': 'Successfully get overview transactions',
         'data': results
     })
