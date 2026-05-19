@@ -1,0 +1,653 @@
+openapi: 3.0.0
+info:
+  title: Personal Finance API
+  description: API for expense/income management with AI chatbot (Gemini)
+  version: 1.0.0
+  contact:
+    name: Your Name
+servers:
+  - url: https://your-app.railway.app
+    description: Production server (Railway)
+  - url: http://localhost:5000
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # ---------- Auth ----------
+    RegisterRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 6 }
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string }
+
+    AuthResponse:
+      type: object
+      properties:
+        message: { type: string }
+        data:
+          type: object
+          properties:
+            access_token: { type: string }
+            refresh_token: { type: string }
+            token_type: { type: string }
+
+    UserProfile:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        email: { type: string }
+        role: { type: string }
+        created_at: { type: string, format: date-time }
+
+    # ---------- Expense ----------
+    ExpenseCategoryGroup:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string }
+        color: { type: string }
+        bgColor: { type: string }
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              icon: { type: string }
+              color: { type: string }
+
+    ExpenseInput:
+      type: object
+      required: [category_id, amount, date]
+      properties:
+        category_id: { type: string }
+        amount: { type: number }
+        date: { type: string, format: date, example: "2025-03-20" }
+        note: { type: string }
+
+    ExpenseOutput:
+      type: object
+      properties:
+        id: { type: string }
+        user_id: { type: string }
+        category_id: { type: string }
+        category_name: { type: string }
+        amount: { type: number }
+        date: { type: string, format: date }
+        note: { type: string }
+        created_at: { type: string, format: date-time }
+        image_url: { type: string, nullable: true }
+
+    # ---------- Income ----------
+    IncomeCategory:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+
+    IncomeInput:
+      type: object
+      required: [amount, date]
+      properties:
+        amount: { type: number }
+        date: { type: string, format: date }
+        note: { type: string }
+
+    IncomeOutput:
+      type: object
+      properties:
+        id: { type: string }
+        user_id: { type: string }
+        amount: { type: number }
+        date: { type: string, format: date }
+        note: { type: string }
+        created_at: { type: string, format: date-time }
+
+    # ---------- Chatbot ----------
+    ChatMessageRequest:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+        months: { type: integer, default: 3, minimum: 1, maximum: 12 }
+
+    ChatMessageResponse:
+      type: object
+      properties:
+        status: { type: string }
+        user_message: { type: string }
+        ai_response: { type: string }
+        financial_summary: { type: object }
+        insights: { type: array, items: { type: string } }
+        insights_count: { type: integer }
+        history_count: { type: integer }
+        timestamp: { type: string, format: date-time }
+
+    ConversationHistory:
+      type: object
+      properties:
+        status: { type: string }
+        message_count: { type: integer }
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              role: { type: string, enum: [user, assistant] }
+              content: { type: string }
+              timestamp: { type: string, format: date-time }
+              snapshot: { type: object }
+        max_turns: { type: integer }
+
+    ErrorResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ==================== AUTH ====================
+  /api/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        400: { description: Missing fields }
+        409: { description: Username/email exists }
+
+  /api/auth/login:
+    post:
+      summary: Login and get tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+        401: { description: Invalid credentials }
+
+  /api/auth/refresh:
+    post:
+      summary: Refresh access token (requires refresh token)
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: New access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data:
+                    type: object
+                    properties:
+                      access_token: { type: string }
+
+  /api/auth/profile:
+    get:
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Profile data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/UserProfile' }
+
+  # ==================== EXPENSE ====================
+  /api/expense/categories:
+    get:
+      summary: Get all expense categories (grouped)
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of category groups
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ExpenseCategoryGroup' }
+
+  /api/expense/:
+    get:
+      summary: Get all expenses of logged-in user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Array of expenses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ExpenseOutput' }
+    post:
+      summary: Create a new expense (JSON)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpenseInput' }
+      responses:
+        201:
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/ExpenseOutput' }
+        400: { description: Validation error }
+
+  /api/expense/{id}:
+    put:
+      summary: Update expense
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category_id: { type: string }
+                amount: { type: number }
+                date: { type: string, format: date }
+                note: { type: string }
+      responses:
+        200:
+          description: Updated expense
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/ExpenseOutput' }
+        403: { description: Permission denied }
+        404: { description: Expense not found }
+    delete:
+      summary: Delete expense
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        200: { description: Deleted successfully }
+        403: { description: Forbidden }
+        404: { description: Not found }
+
+  /api/expense/image:
+    post:
+      summary: Create expense with image (multipart/form-data)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [category_id, amount, date, image]
+              properties:
+                category_id: { type: string }
+                amount: { type: number }
+                date: { type: string, format: date }
+                note: { type: string }
+                image: { type: string, format: binary }
+      responses:
+        201:
+          description: Expense with image created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/ExpenseOutput' }
+    get:
+      summary: Get expenses that have an image
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of expenses with image_url
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ExpenseOutput' }
+
+  /api/expense/image/{id}:
+    delete:
+      summary: Delete expense together with its Cloudinary image
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        200: { description: Deleted expense and image }
+        403: { description: Forbidden }
+        404: { description: Expense not found }
+
+  # ==================== INCOME ====================
+  /api/income/categories:
+    get:
+      summary: Get all income categories
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/IncomeCategory' }
+    post:
+      summary: Create income category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+      responses:
+        201:
+          description: Category created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  id: { type: string }
+
+  /api/income/categories/{id}:
+    put:
+      summary: Update income category
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+      responses:
+        200: { description: Updated }
+        404: { description: Category not found }
+    delete:
+      summary: Delete income category
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        200: { description: Deleted }
+        404: { description: Not found }
+
+  /api/income/:
+    get:
+      summary: Get all incomes of user
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of incomes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/IncomeOutput' }
+    post:
+      summary: Create new income
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IncomeInput' }
+      responses:
+        201:
+          description: Income created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  data: { $ref: '#/components/schemas/IncomeOutput' }
+
+  /api/income/{id}:
+    put:
+      summary: Update income
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { type: number }
+                date: { type: string, format: date }
+                note: { type: string }
+      responses:
+        200: { description: Updated }
+        403: { description: Forbidden }
+        404: { description: Income not found }
+    delete:
+      summary: Delete income
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        200: { description: Deleted }
+        403: { description: Forbidden }
+        404: { description: Not found }
+
+  # ==================== CHATBOT ====================
+  /api/chat/message:
+    post:
+      summary: Send message to AI chatbot (Gemini)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatMessageRequest' }
+      responses:
+        200:
+          description: AI response with financial insights
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ChatMessageResponse' }
+        400: { description: Missing message }
+        500: { description: Gemini API error }
+
+  /api/chat/prompt-preview:
+    post:
+      summary: Preview prompt and AI response (does NOT save to history)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChatMessageRequest' }
+      responses:
+        200:
+          description: Preview result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  final_prompt: { type: string }
+                  ai_preview_response: { type: string }
+                  financial_summary: { type: object }
+                  insights: { type: array }
+
+  /api/chat/history:
+    get:
+      summary: Get conversation history (max 20 turns)
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: History messages
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConversationHistory' }
+    delete:
+      summary: Clear conversation history
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: History cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  message: { type: string }
+
+  /api/chat/insights:
+    get:
+      summary: Get financial insights without chatting
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: months, in: query, schema: { type: integer, default: 3 } }
+      responses:
+        200:
+          description: List of insights
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insights: { type: array, items: { type: string } }
+                  insights_count: { type: integer }
+
+  /api/chat/financial-debug:
+    get:
+      summary: Debug raw financial data (no insights)
+      security:
+        - bearerAuth: []
+      parameters:
+        - { name: months, in: query, schema: { type: integer, default: 3 } }
+      responses:
+        200: { description: Full financial data object }
+    post:
+      summary: Debug with insights
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                months: { type: integer }
+      responses:
+        200: { description: Financial data + insights }
+
+  /api/chat/health:
+    get:
+      summary: Health check for chatbot service
+      responses:
+        200:
+          description: Service status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  gemini_configured: { type: boolean }
