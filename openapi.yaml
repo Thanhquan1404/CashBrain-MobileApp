@@ -4,10 +4,10 @@ info:
   description: API for expense/income management with AI chatbot (Gemini)
   version: 1.0.0
   contact:
-    name: Your Name
+    name: Nguyen Thanh Quan & Tran Kim Ngan
 servers:
-  - url: https://your-app.railway.app
-    description: Production server (Railway)
+  - url: https://cashbrain-mobileapp.onrender.com/api
+    description: Production server (Render)
   - url: http://localhost:5000
     description: Development server
 
