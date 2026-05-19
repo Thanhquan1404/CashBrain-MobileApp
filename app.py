@@ -46,11 +46,13 @@ from expense_service.expense_routes import expense_bp
 from auth_service.auth_routes import auth_bp
 from income_service.income_routes import income_bp
 from analysis_service.analysis_routes import analysis_bp
+from chatbot_service.chatbot_routes import chatbot_bp
 
 app.register_blueprint(expense_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(income_bp)
 app.register_blueprint(analysis_bp)
+app.register_blueprint(chatbot_bp) 
 
 # ====================== CLOUDINARY SET UP ======================
 CLOUDINARY_NAME=os.getenv('CLOUDINARY_NAME', 'your-cloudinary-name')
