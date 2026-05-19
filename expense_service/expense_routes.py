@@ -43,7 +43,7 @@ def get_expense_categories():
 @jwt_required()
 def get_expenses():
     user_id = str(get_jwt_identity())
-    expenses = Expense.objects(user_id=user_id).order_by('-date')
+    expenses = Expense.objects(user_id=user_id).order_by('-created_at')
     return jsonify({
         'message': 'Successfully retrieve user\'s expense data',
         'data': [exp.to_dict() for exp in expenses]
@@ -91,10 +91,10 @@ def update_expense(id):
     try:
         expense = Expense.objects.get(id=ObjectId(id))
     except Expense.DoesNotExist:
-        return jsonify({'message': 'Expense không tồn tại'}), 404
+        return jsonify({'message': 'Expense do not exist'}), 404
 
     if expense.user_id != user_id:
-        return jsonify({'message': 'Bạn không có quyền sửa bản ghi này'}), 403
+        return jsonify({'message': 'You do note have the permission to do this action'}), 403
 
     data = request.get_json()
     if 'category_id' in data:
@@ -105,7 +105,7 @@ def update_expense(id):
         try:
             expense.date = datetime.strptime(data['date'], '%Y-%m-%d').date()
         except ValueError:
-            return jsonify({'message': 'Sai định dạng ngày'}), 400
+            return jsonify({'message': 'date is in wrong format'}), 400
     if 'note' in data:
         expense.note = data['note']
     expense.save()
@@ -117,7 +117,7 @@ def update_expense(id):
         group = ExpenseCategoryGroup.objects(id=category.group_id).first()
 
     return jsonify({
-        'message': 'Cập nhật chi tiêu thành công',
+        'message': 'Successfully update expense information',
         'data': {
             'amount': expense.amount,
             'category_id': str(expense.category_id),
@@ -134,13 +134,13 @@ def delete_expense(id):
     try:
         expense = Expense.objects.get(id=ObjectId(id))
     except Expense.DoesNotExist:
-        return jsonify({'message': 'Expense không tồn tại'}), 404
+        return jsonify({'message': 'Expense does not exist'}), 404
 
     if expense.user_id != user_id:
-        return jsonify({'message': 'Bạn không có quyền xóa bản ghi này'}), 403
+        return jsonify({'message': 'You do not have permission to delete this expense'}), 403
 
     expense.delete()
-    return jsonify({'message': 'Xóa chi tiêu thành công'}), 200
+    return jsonify({'message': 'Successfully delete expense'}), 200
 
 
 # ────────────────────── EXPENSE-IMAGE CRUD ──────────────────────
@@ -216,7 +216,7 @@ def get_expenses_image():
     # Nếu ExpenseImage không có user_id, chúng ta sẽ tối ưu theo cách lọc ở bước sau.
     
     # Cách 1: Giữ nguyên luồng truy vấn của bạn nhưng lọc kết quả đầu ra
-    expenses = list(Expense.objects(user_id=user_id).order_by('-date'))
+    expenses = list(Expense.objects(user_id=user_id).order_by('-created_at'))
     
     if not expenses:
         return jsonify({'message': 'Success', 'data': []}), 200
