@@ -1032,33 +1032,35 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
   # ==================== INCOME ====================
-  /api/income/categories:
+  /income/categories:
     get:
+      tags:
+        - Income Management
       summary: Get all income categories
-      security:
-        - bearerAuth: []
+      operationId: getIncomeCategories
+      description: Retrieve all income categories
       responses:
         200:
-          description: List of categories
+          description: Retrieved successfully
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: '#/components/schemas/IncomeCategory' }
+                items:
+                  $ref: '#/components/schemas/IncomeCategory'
+
     post:
+      tags:
+        - Income Management
       summary: Create income category
-      security:
-        - bearerAuth: []
+      operationId: createIncomeCategory
+      description: Create a new custom income category
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              required: [name]
-              properties:
-                name: { type: string }
-                description: { type: string }
+              $ref: '#/components/schemas/IncomeCategoryRequest'
       responses:
         201:
           description: Category created
@@ -1067,64 +1069,120 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
-                  id: { type: string }
+                  message:
+                    type: string
+                  id:
+                    type: string
+        400:
+          description: Missing name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/income/categories/{id}:
+  /income/categories/{id}:
     put:
+      tags:
+        - Income Management
       summary: Update income category
-      security:
-        - bearerAuth: []
+      operationId: updateIncomeCategory
+      description: Update category name and description
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name: { type: string }
-                description: { type: string }
-      responses:
-        200: { description: Updated }
-        404: { description: Category not found }
-    delete:
-      summary: Delete income category
-      security:
-        - bearerAuth: []
-      parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
-      responses:
-        200: { description: Deleted }
-        404: { description: Not found }
-
-  /api/income/:
-    get:
-      summary: Get all incomes of user
-      security:
-        - bearerAuth: []
+              $ref: '#/components/schemas/IncomeCategoryRequest'
       responses:
         200:
-          description: List of incomes
+          description: Updated successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
+                  message:
+                    type: string
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Income Management
+      summary: Delete income category
+      operationId: deleteIncomeCategory
+      description: Delete a custom income category
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /income/:
+    get:
+      tags:
+        - Income Management
+      summary: Get all user income records
+      operationId: getIncomes
+      description: Retrieve all income records (newest first)
+      responses:
+        200:
+          description: Retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/IncomeOutput' }
+                    items:
+                      $ref: '#/components/schemas/IncomeOutput'
+
     post:
-      summary: Create new income
-      security:
-        - bearerAuth: []
+      tags:
+        - Income Management
+      summary: Create income record
+      operationId: createIncome
+      description: Record a new income transaction
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/IncomeInput' }
+            schema:
+              $ref: '#/components/schemas/IncomeInput'
+            example:
+              amount: 1500.00
+              date: "2025-03-15"
+              note: "Monthly salary"
       responses:
         201:
           description: Income created
@@ -1133,16 +1191,30 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
-                  data: { $ref: '#/components/schemas/IncomeOutput' }
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/IncomeOutput'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/income/{id}:
+  /income/{id}:
     put:
-      summary: Update income
-      security:
-        - bearerAuth: []
+      tags:
+        - Income Management
+      summary: Update income record
+      operationId: updateIncome
+      description: Update income details (owner only)
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -1150,23 +1222,71 @@ paths:
             schema:
               type: object
               properties:
-                amount: { type: number }
-                date: { type: string, format: date }
-                note: { type: string }
+                amount:
+                  type: number
+                date:
+                  type: string
+                  format: date
+                note:
+                  type: string
       responses:
-        200: { description: Updated }
-        403: { description: Forbidden }
-        404: { description: Income not found }
+        200:
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     delete:
-      summary: Delete income
-      security:
-        - bearerAuth: []
+      tags:
+        - Income Management
+      summary: Delete income record
+      operationId: deleteIncome
+      description: Delete an income entry (owner only)
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        200: { description: Deleted }
-        403: { description: Forbidden }
-        404: { description: Not found }
+        200:
+          description: Deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 
   # ==================== CHATBOT ====================
   /api/chat/message:
