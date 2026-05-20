@@ -576,7 +576,7 @@ components:
           type: string
           format: date
           example: "2025-03-20"
-          
+
     ErrorResponse:
       type: object
       properties:
@@ -588,74 +588,166 @@ security:
 
 paths:
   # ==================== AUTH ====================
-  /api/auth/register:
+  /auth/register:
     post:
-      summary: Register a new user
+      tags:
+        - Authentication
+      summary: Register new user account
+      operationId: registerUser
+      description: |
+        Create a new user account with provided credentials.
+        Automatically returns JWT tokens for immediate authentication.
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/RegisterRequest' }
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              username: "john_doe"
+              email: "john.doe@example.com"
+              password: "SecurePass123"
       responses:
         201:
-          description: Success
+          description: User successfully registered with JWT tokens
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/AuthResponse' }
-        400: { description: Missing fields }
-        409: { description: Username/email exists }
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              example:
+                message: "Successfully register a new account"
+                data:
+                  access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  token_type: "bearer"
+        400:
+          description: Validation error - missing or invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        409:
+          description: Conflict - username or email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/auth/login:
+  /auth/login:
     post:
-      summary: Login and get tokens
+      tags:
+        - Authentication
+      summary: User login
+      operationId: loginUser
+      description: Authenticate user and return JWT tokens
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/LoginRequest' }
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: "john_doe"
+              password: "SecurePass123"
       responses:
         200:
-          description: Success
+          description: Successfully authenticated
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/AuthResponse' }
-        401: { description: Invalid credentials }
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        400:
+          description: Missing credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        401:
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/auth/refresh:
+  /auth/refresh:
     post:
-      summary: Refresh access token (requires refresh token)
-      security:
-        - bearerAuth: []
+      tags:
+        - Authentication
+      summary: Refresh access token
+      operationId: refreshToken
+      description: Obtain new access token using refresh token
       responses:
         200:
-          description: New access token
+          description: New access token generated
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
+                  message:
+                    type: string
+                    example: "Successfully retrieve new access token via refresh"
                   data:
                     type: object
                     properties:
-                      access_token: { type: string }
+                      access_token:
+                        type: string
+        401:
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/auth/profile:
+  /auth/profile:
     get:
+      tags:
+        - Authentication
       summary: Get current user profile
-      security:
-        - bearerAuth: []
+      operationId: getUserProfile
+      description: Retrieve authenticated user's profile information
       responses:
         200:
-          description: Profile data
+          description: User profile retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
-                  data: { $ref: '#/components/schemas/UserProfile' }
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
+  /auth/admin-only:
+    get:
+      tags:
+        - Authentication
+      summary: Admin-only endpoint
+      operationId: adminOnlyEndpoint
+      description: Test endpoint to verify admin role
+      responses:
+        200:
+          description: User has admin role
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        403:
+          description: User lacks admin permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   # ==================== EXPENSE ====================
   /api/expense/categories:
     get:
