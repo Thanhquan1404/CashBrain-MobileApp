@@ -1,15 +1,39 @@
 openapi: 3.0.0
 info:
-  title: Personal Finance API
-  description: API for expense/income management with AI chatbot (Gemini)
+  title: CashBrain - Personal Finance Management API
   version: 1.0.0
-  contact:
-    name: Nguyen Thanh Quan & Tran Kim Ngan
+  description: |
+    # CashBrain API Documentation
+    
+    Comprehensive REST API for personal finance management with AI-powered financial insights powered by Google Gemini.
+    
+    ## Core Features
+    - **User Authentication**: JWT-based token authentication with role-based access control
+    - **Expense Tracking**: Create, read, update, delete expenses with categorization and image support
+    - **Income Management**: Track multiple income sources with custom categories
+    - **AI Financial Advisor**: Intelligent chatbot powered by Google Gemini for financial guidance
+    - **Financial Analytics**: Detailed analysis by month, week, and calendar view
+    - **Cloud Storage**: Secure expense receipt storage via Cloudinary integration
+    
+    ## Getting Started
+    
+    ### Authentication Flow
+    1. **Register**: `POST /auth/register` - Create new account
+    2. **Login**: `POST /auth/login` - Get JWT tokens
+    3. **Use Token**: Include in Authorization header: `Authorization: Bearer {access_token}`
+    4. **Refresh**: `POST /auth/refresh` - Refresh expired access token
+    
+    ### API Endpoints Structure
+    - All endpoints require Bearer token (except register/login)
+    - Base URL: Production `https://cashbrain-mobileapp.onrender.com/api` or Dev `http://localhost:5000/api`
+    - Request/Response format: JSON
+
 servers:
   - url: https://cashbrain-mobileapp.onrender.com/api
-    description: Production server (Render)
-  - url: http://localhost:5000
-    description: Development server
+    description: Production Server (Render.com)
+  - url: http://localhost:5000/api
+    description: Development Server (Local)
+
 
 components:
   securitySchemes:
@@ -161,6 +185,7 @@ components:
       type: object
       properties:
         message: { type: string }
+
 
 security:
   - bearerAuth: []
