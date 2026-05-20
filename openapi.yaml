@@ -492,6 +492,91 @@ components:
           description: Maximum conversation turns stored
           example: 20
 
+    MonthlyAnalysisData:
+      type: object
+      description: Monthly financial analysis
+      properties:
+        total_income:
+          type: number
+          description: Total income for current month
+          example: 3500.00
+        total_expense:
+          type: number
+          description: Total expenses for current month
+          example: 2100.00
+        balance:
+          type: number
+          description: Net balance (income - expense)
+          example: 1400.00
+        month:
+          type: string
+          format: date
+          description: Month identifier (YYYY-MM)
+          example: "2025-03"
+        number_of_transactions:
+          type: integer
+          description: Total transaction count this month
+          example: 42
+        percentage_transaction_against_last_month:
+          type: number
+          format: double
+          description: Percentage change in transaction count vs previous month
+          example: 15.5
+        number_of_expense_image:
+          type: integer
+          description: Count of expenses with attached images
+          example: 8
+        number_image_against_last_month:
+          type: integer
+          description: Change in image count vs previous month
+          example: 2
+
+    WeeklyDayData:
+      type: object
+      description: Daily expense summary for weekly analysis
+      properties:
+        day:
+          type: string
+          enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+          description: Day of week
+          example: "Mon"
+        amount:
+          type: number
+          description: Total expenses for this day
+          example: 125.50
+        active:
+          type: boolean
+          description: Is this the current day?
+          example: false
+
+    CalendarTransaction:
+      type: object
+      description: Transaction for calendar view
+      properties:
+        id:
+          type: string
+          format: ObjectId
+          example: "507f1f77bcf86cd799439013"
+        type:
+          type: string
+          enum: [income, expense]
+          example: "expense"
+        amount:
+          type: number
+          example: 35.50
+        category:
+          type: string
+          nullable: true
+          example: "Restaurant"
+        description:
+          type: string
+          nullable: true
+          example: "Lunch"
+        date:
+          type: string
+          format: date
+          example: "2025-03-20"
+          
     ErrorResponse:
       type: object
       properties:
