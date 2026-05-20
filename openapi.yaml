@@ -35,12 +35,25 @@ servers:
     description: Development Server (Local)
 
 
+tags:
+  - name: Authentication
+    description: User registration, login, profile management, and token refresh
+  - name: Expense Management
+    description: CRUD operations for expenses and expense categories with image support
+  - name: Income Management
+    description: Track income and manage custom income categories
+  - name: AI Chatbot
+    description: Interact with AI financial advisor powered by Google Gemini API
+  - name: Financial Analysis
+    description: Get comprehensive financial analysis and insights (monthly, weekly, daily)
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: JWT access token required for protected endpoints
 
   schemas:
     # ---------- Auth ----------
