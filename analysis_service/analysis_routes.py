@@ -19,7 +19,7 @@ def get_monthly_analysis():
     year = today.year
     month = today.month
 
-    # ====================== THÁNG HIỆN TẠI ======================
+    # Helper function để lấy khoảng thời gian của một tháng
     def get_month_range(y, m):
         start = datetime(y, m, 1)
         if m == 12:
@@ -28,9 +28,9 @@ def get_monthly_analysis():
             end = datetime(y, m + 1, 1)
         return start, end
 
+    # ====================== 1. THÁNG HIỆN TẠI ======================
     current_start, current_end = get_month_range(year, month)
 
-    # Tổng thu - chi
     income_pipeline = [
         {'$match': {'user_id': user_id, 'date': {'$gte': current_start, '$lt': current_end}}},
         {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
@@ -40,26 +40,24 @@ def get_monthly_analysis():
         {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
     ]
 
-    total_income = list(Income.objects.aggregate(*income_pipeline))[0]['total'] if list(Income.objects.aggregate(*income_pipeline)) else 0.0
-    total_expense = list(Expense.objects.aggregate(*expense_pipeline))[0]['total'] if list(Expense.objects.aggregate(*expense_pipeline)) else 0.0
+    # Tối ưu hóa: Chỉ gọi aggregate 1 lần duy nhất cho mỗi bên
+    income_result = list(Income.objects.aggregate(*income_pipeline))
+    expense_result = list(Expense.objects.aggregate(*expense_pipeline))
 
-    # Số lượng transaction
+    total_income = income_result[0]['total'] if income_result else 0.0
+    total_expense = expense_result[0]['total'] if expense_result else 0.0
+
+    # Số lượng transaction tháng này
     num_income = Income.objects(user_id=user_id, date__gte=current_start, date__lt=current_end).count()
     num_expense = Expense.objects(user_id=user_id, date__gte=current_start, date__lt=current_end).count()
     number_of_transactions = num_income + num_expense
 
-    # Số expense có ảnh
-    expense_ids_current = Expense.objects(
-        user_id=user_id, 
-        date__gte=current_start, 
-        date__lt=current_end
-    ).scalar('id')
-    
-    number_of_expense_image = ExpenseImage.objects(
-        expense_id__in=expense_ids_current
-    ).count()
+    # Số expense có ảnh tháng này
+    expense_ids_current = Expense.objects(user_id=user_id, date__gte=current_start, date__lt=current_end).scalar('id')
+    number_of_expense_image = ExpenseImage.objects(expense_id__in=expense_ids_current).count()
 
-    # ====================== THÁNG TRƯỚC ======================
+
+    # ====================== 2. THÁNG TRƯỚC ======================
     if month == 1:
         last_year, last_month = year - 1, 12
     else:
@@ -67,23 +65,37 @@ def get_monthly_analysis():
 
     last_start, last_end = get_month_range(last_year, last_month)
 
-    # Transaction tháng trước
+    # BỔ SUNG: Tính tổng tiền expense của tháng trước bằng pipeline
+    last_expense_pipeline = [
+        {'$match': {'user_id': user_id, 'date': {'$gte': last_start, '$lt': last_end}}},
+        {'$group': {'_id': None, 'total': {'$sum': '$amount'}}}
+    ]
+    last_expense_result = list(Expense.objects.aggregate(*last_expense_pipeline))
+    last_total_expense = last_expense_result[0]['total'] if last_expense_result else 0.0
+
+    # Các thông số đếm (count) của tháng trước
     last_num_income = Income.objects(user_id=user_id, date__gte=last_start, date__lt=last_end).count()
     last_num_expense = Expense.objects(user_id=user_id, date__gte=last_start, date__lt=last_end).count()
     last_total_transactions = last_num_income + last_num_expense
 
-    # Expense image tháng trước
-    expense_ids_last = Expense.objects(
-        user_id=user_id, 
-        date__gte=last_start, 
-        date__lt=last_end
-    ).scalar('id')
-    
-    last_number_of_expense_image = ExpenseImage.objects(
-        expense_id__in=expense_ids_last
-    ).count()
+    expense_ids_last = Expense.objects(user_id=user_id, date__gte=last_start, date__lt=last_end).scalar('id')
+    last_number_of_expense_image = ExpenseImage.objects(expense_id__in=expense_ids_last).count()
 
-    # Tính percentage transaction
+
+    # ====================== 3. XỬ LÝ LOGIC PHẦN TRĂM ======================
+    
+    # Logic tính phần trăm chênh lệch SỐ TIỀN CHI TIÊU (Yêu cầu mới của bạn)
+    if last_total_expense > 0:
+        percentage_expense_against_last_month = round(
+            ((total_expense - last_total_expense) / last_total_expense) * 100, 
+            2
+        )
+    else:
+        # Trường hợp tháng trước không tiêu đồng nào (last_total_expense == 0)
+        # Nếu tháng này cũng bằng 0 thì chênh lệch là 0%, ngược lại là tăng trưởng 100%
+        percentage_expense_against_last_month = 0.0 if total_expense == 0 else 100.0
+
+    # Logic tính phần trăm chênh lệch SỐ LƯỢNG TRANSACTION (Giữ lại từ code cũ)
     if last_total_transactions > 0:
         percentage_transaction = round(
             ((number_of_transactions - last_total_transactions) / last_total_transactions) * 100, 
@@ -92,7 +104,7 @@ def get_monthly_analysis():
     else:
         percentage_transaction = 0.0 if number_of_transactions == 0 else 100.0
 
-    # Chênh lệch số ảnh (có thể âm)
+    # Chênh lệch số ảnh
     number_image_against_last_month = number_of_expense_image - last_number_of_expense_image
 
     return jsonify({
@@ -103,9 +115,11 @@ def get_monthly_analysis():
             'balance': float(total_income - total_expense),
             'month': today.strftime('%Y-%m'),
             
-            # Dữ liệu mới
+            # Thêm key mới trả về cho Client theo yêu cầu của bạn
+            'percentage_transaction_against_last_month': percentage_expense_against_last_month,
+            
+            # Các dữ liệu cũ vẫn được giữ nguyên
             'number_of_transactions': number_of_transactions,
-            'percentage_transaction_against_last_month': percentage_transaction,
             'number_of_expense_image': number_of_expense_image,
             'number_image_against_last_month': number_image_against_last_month
         }
