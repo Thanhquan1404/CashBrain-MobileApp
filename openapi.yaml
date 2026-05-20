@@ -34,7 +34,6 @@ servers:
   - url: http://localhost:5000/api
     description: Development Server (Local)
 
-
 tags:
   - name: Authentication
     description: User registration, login, profile management, and token refresh
@@ -56,7 +55,21 @@ components:
       description: JWT access token required for protected endpoints
 
   schemas:
-    # ---------- Auth ----------
+    ErrorResponse:
+      type: object
+      description: Standard error response
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Error description
+          example: "Invalid request parameters"
+        error:
+          type: string
+          description: Additional error details
+          example: "Category not found"
+
     RegisterRequest:
       type: object
       description: User registration request with credentials
@@ -153,7 +166,7 @@ components:
           description: Account creation timestamp (ISO 8601)
           example: "2025-01-15T10:30:00Z"
 
-    # ---------- Expense ----------  
+
     ExpenseCategoryGroup:
       type: object
       description: Group of related expense categories
@@ -283,7 +296,6 @@ components:
           description: URL to Cloudinary image (if attached)
           example: "https://res.cloudinary.com/cashbrain/image/upload/v1234567890/expense-123.jpg"
 
-    # ---------- Income ----------
     IncomeCategory:
       type: object
       description: Income source category
@@ -378,7 +390,6 @@ components:
           format: date-time
           example: "2025-03-15T08:00:00Z"
 
-    # ---------- Chatbot ----------
     ChatMessageRequest:
       type: object
       description: Request to send message to AI financial advisor
@@ -577,17 +588,11 @@ components:
           format: date
           example: "2025-03-20"
 
-    ErrorResponse:
-      type: object
-      properties:
-        message: { type: string }
-
 
 security:
   - bearerAuth: []
 
 paths:
-  # ==================== AUTH ====================
   /auth/register:
     post:
       tags:
@@ -749,7 +754,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  # ==================== EXPENSE ====================
   /expense/categories:
     get:
       tags:
@@ -1031,7 +1035,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  # ==================== INCOME ====================
   /income/categories:
     get:
       tags:
@@ -1287,8 +1290,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
-  # ==================== CHATBOT ====================
   /chat/message:
     post:
       tags:
@@ -1476,7 +1477,7 @@ paths:
             application/json:
               schema:
                 type: object
-                
+
   /analysis/monthly:
     get:
       tags:
