@@ -282,32 +282,101 @@ components:
           nullable: true
           description: URL to Cloudinary image (if attached)
           example: "https://res.cloudinary.com/cashbrain/image/upload/v1234567890/expense-123.jpg"
-          
+
     # ---------- Income ----------
     IncomeCategory:
       type: object
+      description: Income source category
       properties:
-        id: { type: string }
-        name: { type: string }
-        description: { type: string }
+        id:
+          type: string
+          format: ObjectId
+          description: Category ID
+          example: "507f1f77bcf86cd799439020"
+        name:
+          type: string
+          description: Category name (e.g., Salary, Freelance, Bonus)
+          example: "Salary"
+        description:
+          type: string
+          nullable: true
+          description: Optional description
+          example: "Monthly salary from employment"
+
+    IncomeCategoryRequest:
+      type: object
+      description: Request for creating/updating income category
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Category name
+          example: "Freelance Work"
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Optional category description
+          example: "Income from freelance projects and consulting"
 
     IncomeInput:
       type: object
-      required: [amount, date]
+      description: Request payload for creating income record
+      required:
+        - amount
+        - date
       properties:
-        amount: { type: number }
-        date: { type: string, format: date }
-        note: { type: string }
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          exclusiveMinimum: true
+          description: Income amount
+          example: 1500.00
+        date:
+          type: string
+          format: date
+          description: Income date (YYYY-MM-DD)
+          example: "2025-03-15"
+        note:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Optional note
+          example: "Monthly salary payment"
 
     IncomeOutput:
       type: object
+      description: Complete income record
       properties:
-        id: { type: string }
-        user_id: { type: string }
-        amount: { type: number }
-        date: { type: string, format: date }
-        note: { type: string }
-        created_at: { type: string, format: date-time }
+        id:
+          type: string
+          format: ObjectId
+          example: "507f1f77bcf86cd799439021"
+        user_id:
+          type: string
+          format: ObjectId
+          description: User who owns this income
+          example: "507f1f77bcf86cd799439011"
+        amount:
+          type: number
+          format: double
+          example: 1500.00
+        date:
+          type: string
+          format: date
+          example: "2025-03-15"
+        note:
+          type: string
+          nullable: true
+          example: "Monthly salary"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-03-15T08:00:00Z"
 
     # ---------- Chatbot ----------
     ChatMessageRequest:
