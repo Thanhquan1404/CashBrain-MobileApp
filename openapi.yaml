@@ -1289,64 +1289,103 @@ paths:
 
 
   # ==================== CHATBOT ====================
-  /api/chat/message:
+  /chat/message:
     post:
-      summary: Send message to AI chatbot (Gemini)
-      security:
-        - bearerAuth: []
+      tags:
+        - AI Chatbot
+      summary: Send message to AI financial advisor
+      operationId: chatMessage
+      description: |
+        Send message to Gemini-powered AI advisor.
+        Message is saved to conversation history (max 20 turns).
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ChatMessageRequest' }
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+            example:
+              message: "How much did I spend on food last month?"
+              months: 3
       responses:
         200:
-          description: AI response with financial insights
+          description: AI response received
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ChatMessageResponse' }
-        400: { description: Missing message }
-        500: { description: Gemini API error }
+              schema:
+                $ref: '#/components/schemas/ChatMessageResponse'
+        400:
+          description: Missing message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Gemini API error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
-  /api/chat/prompt-preview:
+  /chat/prompt-preview:
     post:
-      summary: Preview prompt and AI response (does NOT save to history)
-      security:
-        - bearerAuth: []
+      tags:
+        - AI Chatbot
+      summary: Preview AI response (no history save)
+      operationId: chatPromptPreview
+      description: Test AI response without saving to conversation history
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/ChatMessageRequest' }
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
       responses:
         200:
-          description: Preview result
+          description: Preview generated
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status: { type: string }
-                  final_prompt: { type: string }
-                  ai_preview_response: { type: string }
-                  financial_summary: { type: object }
-                  insights: { type: array }
-
-  /api/chat/history:
-    get:
-      summary: Get conversation history (max 20 turns)
-      security:
-        - bearerAuth: []
-      responses:
-        200:
-          description: History messages
+                  status:
+                    type: string
+                  final_prompt:
+                    type: string
+                  ai_preview_response:
+                    type: string
+                  financial_summary:
+                    type: object
+                  insights:
+                    type: array
+        400:
+          description: Validation error
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/ConversationHistory' }
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /chat/history:
+    get:
+      tags:
+        - AI Chatbot
+      summary: Get conversation history
+      operationId: getConversationHistory
+      description: Retrieve conversation history (max 20 turns)
+      responses:
+        200:
+          description: History retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationHistory'
+
     delete:
+      tags:
+        - AI Chatbot
       summary: Clear conversation history
-      security:
-        - bearerAuth: []
+      operationId: deleteConversationHistory
+      description: Delete all conversation history
       responses:
         200:
           description: History cleared
@@ -1355,60 +1394,85 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: { type: string }
-                  message: { type: string }
+                  status:
+                    type: string
+                  message:
+                    type: string
 
-  /api/chat/insights:
+  /chat/insights:
     get:
-      summary: Get financial insights without chatting
-      security:
-        - bearerAuth: []
+      tags:
+        - AI Chatbot
+      summary: Get financial insights
+      operationId: getInsights
+      description: Generate financial insights without chatting
       parameters:
-        - { name: months, in: query, schema: { type: integer, default: 3 } }
+        - name: months
+          in: query
+          schema:
+            type: integer
+            default: 3
+            minimum: 1
+            maximum: 12
+          example: 6
       responses:
         200:
-          description: List of insights
+          description: Insights generated
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  insights: { type: array, items: { type: string } }
-                  insights_count: { type: integer }
+                  status:
+                    type: string
+                  user_id:
+                    type: string
+                  insights:
+                    type: array
+                    items:
+                      type: string
+                  insights_count:
+                    type: integer
 
-  /api/chat/financial-debug:
+  /chat/financial-debug:
     get:
-      summary: Debug raw financial data (no insights)
-      security:
-        - bearerAuth: []
+      tags:
+        - AI Chatbot
+      summary: Get raw financial data
+      operationId: getFinancialDebugGet
+      description: Retrieve raw financial data for debugging
       parameters:
-        - { name: months, in: query, schema: { type: integer, default: 3 } }
+        - name: months
+          in: query
+          schema:
+            type: integer
+            default: 3
       responses:
-        200: { description: Full financial data object }
+        200:
+          description: Financial data returned
+          content:
+            application/json:
+              schema:
+                type: object
+
     post:
-      summary: Debug with insights
-      security:
-        - bearerAuth: []
+      tags:
+        - AI Chatbot
+      summary: Get financial data with insights
+      operationId: getFinancialDebugPost
+      description: Retrieve financial data with AI insights for debugging
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                months: { type: integer }
-      responses:
-        200: { description: Financial data + insights }
-
-  /api/chat/health:
-    get:
-      summary: Health check for chatbot service
+                months:
+                  type: integer
       responses:
         200:
-          description: Service status
+          description: Data with insights returned
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  status: { type: string }
-                  gemini_configured: { type: boolean }
