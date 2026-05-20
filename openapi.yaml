@@ -381,38 +381,116 @@ components:
     # ---------- Chatbot ----------
     ChatMessageRequest:
       type: object
-      required: [message]
+      description: Request to send message to AI financial advisor
+      required:
+        - message
       properties:
-        message: { type: string }
-        months: { type: integer, default: 3, minimum: 1, maximum: 12 }
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Question or statement for the AI advisor
+          example: "How much did I spend on food last month?"
+        months:
+          type: integer
+          minimum: 1
+          maximum: 12
+          default: 3
+          description: Number of months to analyze for context
+          example: 3
 
     ChatMessageResponse:
       type: object
+      description: AI advisor's response with financial analysis
       properties:
-        status: { type: string }
-        user_message: { type: string }
-        ai_response: { type: string }
-        financial_summary: { type: object }
-        insights: { type: array, items: { type: string } }
-        insights_count: { type: integer }
-        history_count: { type: integer }
-        timestamp: { type: string, format: date-time }
+        status:
+          type: string
+          enum: [success]
+          example: "success"
+        user_message:
+          type: string
+          example: "How much did I spend on food last month?"
+        ai_response:
+          type: string
+          description: AI-generated response with analysis
+          example: "Based on your recent transactions, you spent $450 on dining out last month. This represents 15% of your total expenses. Consider setting a dining budget of $400 to optimize your spending."
+        financial_summary:
+          type: object
+          description: Summary of analyzed financial data
+          properties:
+            total_income:
+              type: number
+              example: 3500.00
+            total_expense:
+              type: number
+              example: 2100.00
+            balance:
+              type: number
+              example: 1400.00
+        insights:
+          type: array
+          description: List of AI-generated insights
+          items:
+            type: string
+          example:
+            - "Your food spending increased 20% compared to previous month"
+            - "Transportation costs are higher than your average"
+            - "You're saving money better than last month"
+        insights_count:
+          type: integer
+          example: 3
+        history_count:
+          type: integer
+          description: Total number of messages in conversation history
+          example: 12
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-20T14:30:00Z"
+
+    ConversationMessage:
+      type: object
+      description: Individual message in conversation history
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+          description: Message sender
+          example: "user"
+        content:
+          type: string
+          description: Message text
+          example: "Tell me about my spending"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-03-20T14:30:00Z"
+        snapshot:
+          type: object
+          nullable: true
+          description: Financial data snapshot at message time
 
     ConversationHistory:
       type: object
+      description: Complete conversation history with AI advisor
       properties:
-        status: { type: string }
-        message_count: { type: integer }
+        status:
+          type: string
+          enum: [success]
+          example: "success"
+        message_count:
+          type: integer
+          description: Total messages in history
+          example: 8
         messages:
           type: array
+          description: Array of conversation messages (max 20 turns)
           items:
-            type: object
-            properties:
-              role: { type: string, enum: [user, assistant] }
-              content: { type: string }
-              timestamp: { type: string, format: date-time }
-              snapshot: { type: object }
-        max_turns: { type: integer }
+            $ref: '#/components/schemas/ConversationMessage'
+        max_turns:
+          type: integer
+          description: Maximum conversation turns stored
+          example: 20
 
     ErrorResponse:
       type: object
