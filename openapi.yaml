@@ -153,46 +153,136 @@ components:
           description: Account creation timestamp (ISO 8601)
           example: "2025-01-15T10:30:00Z"
 
-    # ---------- Expense ----------
+    # ---------- Expense ----------  
     ExpenseCategoryGroup:
       type: object
+      description: Group of related expense categories
       properties:
-        id: { type: string }
-        title: { type: string }
-        color: { type: string }
-        bgColor: { type: string }
+        id:
+          type: string
+          format: ObjectId
+          description: Category group ID
+          example: "507f1f77bcf86cd799439001"
+        title:
+          type: string
+          description: Group name/title
+          example: "Food & Dining"
+        color:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          description: Primary color (hex format)
+          example: "#FF6B6B"
+        bgColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+          description: Background color (hex format)
+          example: "#FFE5E5"
         categories:
           type: array
+          description: List of individual categories in this group
           items:
             type: object
             properties:
-              id: { type: string }
-              label: { type: string }
-              icon: { type: string }
-              color: { type: string }
+              id:
+                type: string
+                format: ObjectId
+                example: "507f1f77bcf86cd799439002"
+              label:
+                type: string
+                description: Category name
+                example: "Restaurant"
+              icon:
+                type: string
+                description: Icon identifier/emoji
+                example: "🍽️"
+              color:
+                type: string
+                pattern: "^#[0-9A-Fa-f]{6}$"
+                description: Category color
+                example: "#FF6B6B"
 
     ExpenseInput:
       type: object
-      required: [category_id, amount, date]
+      description: Request payload for creating a new expense
+      required:
+        - category_id
+        - amount
+        - date
       properties:
-        category_id: { type: string }
-        amount: { type: number }
-        date: { type: string, format: date, example: "2025-03-20" }
-        note: { type: string }
+        category_id:
+          type: string
+          format: ObjectId
+          description: ID of the expense category
+          example: "507f1f77bcf86cd799439002"
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          exclusiveMinimum: true
+          description: Expense amount (must be > 0)
+          example: 35.50
+        date:
+          type: string
+          format: date
+          description: Date of expense (YYYY-MM-DD format)
+          example: "2025-03-20"
+        note:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Optional note/description
+          example: "Lunch with team at the new Italian restaurant"
 
     ExpenseOutput:
       type: object
+      description: Complete expense record returned by API
       properties:
-        id: { type: string }
-        user_id: { type: string }
-        category_id: { type: string }
-        category_name: { type: string }
-        amount: { type: number }
-        date: { type: string, format: date }
-        note: { type: string }
-        created_at: { type: string, format: date-time }
-        image_url: { type: string, nullable: true }
-
+        id:
+          type: string
+          format: ObjectId
+          description: Unique expense ID
+          example: "507f1f77bcf86cd799439013"
+        user_id:
+          type: string
+          format: ObjectId
+          description: ID of the user who owns this expense
+          example: "507f1f77bcf86cd799439011"
+        category_id:
+          type: string
+          format: ObjectId
+          description: Category ID for this expense
+          example: "507f1f77bcf86cd799439002"
+        category_name:
+          type: string
+          description: Category name for display
+          example: "Restaurant"
+        amount:
+          type: number
+          format: double
+          description: Expense amount
+          example: 35.50
+        date:
+          type: string
+          format: date
+          description: Expense date
+          example: "2025-03-20"
+        note:
+          type: string
+          nullable: true
+          description: Expense note
+          example: "Lunch with team"
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2025-03-20T12:30:00Z"
+        image_url:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to Cloudinary image (if attached)
+          example: "https://res.cloudinary.com/cashbrain/image/upload/v1234567890/expense-123.jpg"
+          
     # ---------- Income ----------
     IncomeCategory:
       type: object
