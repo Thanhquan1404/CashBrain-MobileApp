@@ -59,38 +59,99 @@ components:
     # ---------- Auth ----------
     RegisterRequest:
       type: object
-      required: [username, email, password]
+      description: User registration request with credentials
+      required:
+        - username
+        - email
+        - password
       properties:
-        username: { type: string }
-        email: { type: string, format: email }
-        password: { type: string, minLength: 6 }
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Unique username (3-50 characters)
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: Valid email address
+          example: "john.doe@example.com"
+        password:
+          type: string
+          minLength: 6
+          maxLength: 128
+          description: Password (minimum 6 characters)
+          example: "securePassword123"
 
     LoginRequest:
       type: object
-      required: [username, password]
+      description: User login credentials
+      required:
+        - username
+        - password
       properties:
-        username: { type: string }
-        password: { type: string }
+        username:
+          type: string
+          description: Username or email
+          example: "john_doe"
+        password:
+          type: string
+          description: User password
+          example: "securePassword123"
 
     AuthResponse:
       type: object
+      description: Authentication response with JWT tokens
       properties:
-        message: { type: string }
+        message:
+          type: string
+          description: Status message
+          example: "Successfully register a new account"
         data:
           type: object
+          description: Token data
           properties:
-            access_token: { type: string }
-            refresh_token: { type: string }
-            token_type: { type: string }
+            access_token:
+              type: string
+              description: JWT access token (expires in ~15 minutes)
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            refresh_token:
+              type: string
+              description: JWT refresh token for getting new access tokens
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            token_type:
+              type: string
+              enum: [bearer]
+              example: "bearer"
 
     UserProfile:
       type: object
+      description: User account profile information
       properties:
-        id: { type: string }
-        username: { type: string }
-        email: { type: string }
-        role: { type: string }
-        created_at: { type: string, format: date-time }
+        id:
+          type: string
+          format: ObjectId
+          description: Unique user ID (MongoDB ObjectId)
+          example: "507f1f77bcf86cd799439011"
+        username:
+          type: string
+          description: User's username
+          example: "john_doe"
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: "john.doe@example.com"
+        role:
+          type: string
+          enum: [user, admin]
+          description: User role/permission level
+          example: "user"
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO 8601)
+          example: "2025-01-15T10:30:00Z"
 
     # ---------- Expense ----------
     ExpenseCategoryGroup:
