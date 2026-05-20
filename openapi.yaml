@@ -1476,3 +1476,108 @@ paths:
             application/json:
               schema:
                 type: object
+                
+  /analysis/monthly:
+    get:
+      tags:
+        - Financial Analysis
+      summary: Get monthly financial analysis
+      operationId: getMonthlyAnalysis
+      description: |
+        Get detailed financial analysis for current month.
+        Includes income, expenses, balance, transaction count, and image count.
+      responses:
+        200:
+          description: Monthly analysis retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      total_income:
+                        type: number
+                      total_expense:
+                        type: number
+                      balance:
+                        type: number
+                      month:
+                        type: string
+                      number_of_transactions:
+                        type: integer
+                      percentage_transaction_against_last_month:
+                        type: number
+                      number_of_expense_image:
+                        type: integer
+                      number_image_against_last_month:
+                        type: integer
+
+  /analysis/weekly:
+    get:
+      tags:
+        - Financial Analysis
+      summary: Get weekly expense breakdown
+      operationId: getWeeklyAnalysis
+      description: Get daily expense breakdown for current week
+      responses:
+        200:
+          description: Weekly analysis retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/WeeklyDayData'
+                  week:
+                    type: string
+
+  /analysis/calendar-month:
+    get:
+      tags:
+        - Financial Analysis
+      summary: Get calendar view for month
+      operationId: getCalendarMonth
+      description: Get all transactions for specific month in calendar view
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: ISO 8601 date (default current month)
+          example: "2025-03-01T00:00:00Z"
+      responses:
+        200:
+          description: Calendar data retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  month:
+                    type: string
+                  total_income:
+                    type: number
+                  total_expense:
+                    type: number
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CalendarTransaction'
+        400:
+          description: Invalid date format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
