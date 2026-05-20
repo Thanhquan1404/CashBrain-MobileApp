@@ -918,24 +918,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api/expense/image:
+  /expense/image:
     post:
-      summary: Create expense with image (multipart/form-data)
-      security:
-        - bearerAuth: []
+      tags:
+        - Expense Management
+      summary: Create expense with receipt image
+      operationId: createExpenseWithImage
+      description: Create expense with attached receipt image (uploaded to Cloudinary)
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
               type: object
-              required: [category_id, amount, date, image]
+              required:
+                - category_id
+                - amount
+                - date
+                - image
               properties:
-                category_id: { type: string }
-                amount: { type: number }
-                date: { type: string, format: date }
-                note: { type: string }
-                image: { type: string, format: binary }
+                category_id:
+                  type: string
+                amount:
+                  type: number
+                date:
+                  type: string
+                  format: date
+                note:
+                  type: string
+                image:
+                  type: string
+                  format: binary
       responses:
         201:
           description: Expense with image created
@@ -944,36 +957,79 @@ paths:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
-                  data: { $ref: '#/components/schemas/ExpenseOutput' }
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/ExpenseOutput'
+        400:
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        500:
+          description: Image upload error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     get:
-      summary: Get expenses that have an image
-      security:
-        - bearerAuth: []
+      tags:
+        - Expense Management
+      summary: Get expenses with images
+      operationId: getExpensesWithImages
+      description: Retrieve only expenses that have attached images
       responses:
         200:
-          description: List of expenses with image_url
+          description: Successfully retrieved expenses with images
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message: { type: string }
+                  message:
+                    type: string
                   data:
                     type: array
-                    items: { $ref: '#/components/schemas/ExpenseOutput' }
+                    items:
+                      $ref: '#/components/schemas/ExpenseOutput'
 
-  /api/expense/image/{id}:
+  /expense/image/{id}:
     delete:
-      summary: Delete expense together with its Cloudinary image
-      security:
-        - bearerAuth: []
+      tags:
+        - Expense Management
+      summary: Delete expense and image
+      operationId: deleteExpenseWithImage
+      description: Delete expense and remove image from Cloudinary (owner only)
       parameters:
-        - { name: id, in: path, required: true, schema: { type: string } }
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
-        200: { description: Deleted expense and image }
-        403: { description: Forbidden }
-        404: { description: Expense not found }
+        200:
+          description: Expense and image deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        403:
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        404:
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   # ==================== INCOME ====================
   /api/income/categories:
