@@ -69,7 +69,7 @@ def create_expense():
 
     # Kiểm tra category có tồn tại không (tuỳ chọn)
     if not ExpenseCategory.objects(id=ObjectId(category_id)).first():
-        return jsonify({'message': 'category_id không hợp lệ'}), 400
+        return jsonify({'message': 'category_id do not allow'}), 400
 
     expense = Expense(
         user_id=user_id,
